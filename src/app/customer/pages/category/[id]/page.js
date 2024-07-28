@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-import 'tailwindcss/tailwind.css';
+
 import { motion } from 'framer-motion';
 
 const CategoryPage = () => {
@@ -130,7 +130,7 @@ const CategoryPage = () => {
         {filteredProducts.map((product) => (
           <div
             key={product.id}
-            className="bg-white shadow-md rounded-lg p-4 relative cursor-pointer h-80"
+            className="bg-white shadow-md rounded-lg p-4 relative cursor-pointer"
             onClick={() => handleProductClick(product.id)}
           >
             {product.images && product.images.length > 0 ? (

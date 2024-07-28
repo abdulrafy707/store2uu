@@ -6,7 +6,6 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FiPlusCircle, FiChevronLeft, FiChevronRight, FiPlus, FiMinus, FiTrash2, FiShoppingCart, FiX } from 'react-icons/fi';
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 const ProductPage = () => {
   const { id } = useParams();
