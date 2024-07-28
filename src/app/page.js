@@ -5,7 +5,7 @@ import TopCategories from './customer/components/TopCategories';
 import Products from './customer/components/Products';
 import Features from './customer/components/Features';
 import Slider from './customer/components/Carousel';
-import CategoryProductsComponent from './components/CategoryProductsComponent';
+import CategoryProductsComponent from './customer/components/CategoryProductsComponent';
 
 
 export default function CustomerPage () {
