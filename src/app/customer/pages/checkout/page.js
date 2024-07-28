@@ -54,7 +54,7 @@ const CheckoutPage = () => {
       if (response.data.status) {
         alert('Order placed successfully');
         localStorage.removeItem('cart');
-        router.push('/customer');
+        router.push('/');
       } else {
         alert('Failed to place order. Please try again.');
       }

@@ -6,6 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FiPlus, FiMinus, FiTrash2 } from 'react-icons/fi';
 import axios from 'axios';
+import {jwt_decode} from 'jsonwebtoken';
 
 const CartPage = () => {
   const [cart, setCart] = useState([]);
@@ -28,7 +29,22 @@ const CartPage = () => {
   };
 
   const handleCheckout = () => {
-    router.push(`/customer/pages/checkout?total=${total}`);
+    const token = localStorage.getItem('token'); // Assuming the token is stored in localStorage
+    if (token) {
+      try {
+        const decoded = jwt_decode(token);
+        if (decoded && decoded.exp > Date.now() / 1000) {
+          router.push(`/customer/pages/checkout?total=${total}`);
+        } else {
+          router.push('/customer/pages/login');
+        }
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        router.push('/customer/pages/login');
+      }
+    } else {
+      router.push('/customer/pages/login');
+    }
   };
 
   const handleAddToCart = (item) => {

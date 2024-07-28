@@ -6,12 +6,14 @@ import Products from './customer/components/Products';
 import Features from './customer/components/Features';
 import Slider from './customer/components/Carousel';
 import CategoryProductsComponent from './customer/components/CategoryProductsComponent';
+import Customerlayout from './customer/layout';
 
 
 export default function CustomerPage () {
   // const [formData, setFormData] = useState({});
 
   return (
+    <Customerlayout>
     <div>
       
       
@@ -29,5 +31,6 @@ export default function CustomerPage () {
         
       </main>
     </div>
+    </Customerlayout>
   );
 };
