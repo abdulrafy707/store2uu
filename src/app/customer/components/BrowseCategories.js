@@ -68,7 +68,7 @@ const BrowseCategories = () => {
           <FiHeadphones className="mr-2" size={24} />
           <div>
             <div className="font-bold">+92 312 8807795</div>
-            <div className="text-gray-500">24/7 Support Center</div>
+            <div className="text-gray-500">24/7 Support </div>
           </div>
         </div>
       </div>

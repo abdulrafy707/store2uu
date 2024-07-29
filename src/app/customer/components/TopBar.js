@@ -7,12 +7,12 @@ import { motion } from 'framer-motion';
 
 const TopBar = () => {
   return (
-    <div className="bg-gray-100 py-2 border-b border-gray-300">
+    <div className="bg-gray-100 py-2  border-gray-300">
       <div className="container mx-auto flex justify-between items-center">
-        <div className="flex space-x-4 text-blue-500">
-          <a href="#" className="hover:underline">Become Seller</a>
-          <a href="#" className="hover:underline">Affiliation Program</a>
-          <div className='w-[750px] mx-auto overflow-x-hidden px-4'>
+        <div className="flex space-x-4 text-blue-500 text-sm px-7">
+          <a href="#" className="hover:underline"> Seller</a>
+          <a href="#" className="hover:underline">Program</a>
+          <div className='w-[720px] mx-auto overflow-x-hidden px-4'>
             <motion.div
             className="flex items-center space-x-2 mx-4 text-gray-500"
             animate={{ x: ['100%', '-80%'] }}
@@ -24,8 +24,8 @@ const TopBar = () => {
           </motion.div>
           </div>
         </div>
-        <div className="flex items-center space-x-4 text-gray-500">
-          <span>Need help? Call Us: <a href="tel:+923128807795" className="text-blue-500 hover:underline">+92 312 8807795</a></span>
+        <div className="flex items-center space-x-4 text-gray-500 text-sm">
+          <span>Call Us: <a href="tel:+923128807795" className="text-blue-500 hover:underline">+92 312 8807795</a></span>
           <div className="flex items-center space-x-2">
             <img src="/us-flag.png" alt="US Flag" className="w-5 h-5" />
             <select className="border-none bg-transparent focus:outline-none">

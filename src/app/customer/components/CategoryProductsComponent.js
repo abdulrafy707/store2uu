@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 
-
 const CategoryProductsComponent = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -28,10 +27,16 @@ const CategoryProductsComponent = () => {
 
   const fetchSubcategoriesAndProducts = async (categoryId) => {
     try {
+      // Fetch subcategories
       const subcategoriesResponse = await axios.get(`/api/subcategories?categoryId=${categoryId}`); // Replace with your actual API endpoint
       const subcategoriesData = subcategoriesResponse.data;
 
-      const productsResponse = await axios.get(`/api/products?categoryId=${categoryId}`); // Adjusted API endpoint to fetch products by category ID
+      // Collect subcategory IDs
+      const subcategoryIds = subcategoriesData.map(subcategory => subcategory.id);
+      subcategoryIds.push(categoryId); // Include the selected category ID itself
+
+      // Fetch products for the selected category and its subcategories
+      const productsResponse = await axios.get(`/api/products?categoryIds=${subcategoryIds.join(',')}`); // Adjusted API endpoint to fetch products by category IDs
       const productsData = productsResponse.data;
 
       setProducts(productsData);
@@ -46,15 +51,11 @@ const CategoryProductsComponent = () => {
     fetchSubcategoriesAndProducts(categoryId);
   };
 
-  const backgroundColors = [
-    'bg-red-100', 'bg-green-100', 'bg-blue-100', 'bg-pink-100', 'bg-gray-100', 'bg-yellow-100'
-  ];
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h2 className="text-2xl font-semibold mb-6">Categories</h2>
       <div className="flex space-x-4 overflow-x-auto">
-        {categories.map((category, index) => (
+        {categories.map((category) => (
           <button
             key={category.id}
             className={`cursor-pointer p-2 rounded ${selectedCategory === category.id ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`}
@@ -72,7 +73,7 @@ const CategoryProductsComponent = () => {
             filteredProducts.map((product) => (
               <motion.div
                 key={product.id}
-                className="bg-white shadow-md rounded-lg p-4 relative cursor-pointer h-80"
+                className="bg-white shadow-md rounded-lg p-4 relative cursor-pointer w-64 h-80 m-0" // Set fixed width, height, and remove margin
                 whileHover={{ scale: 1.05, boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.1)" }}
                 transition={{ duration: 0.3 }}
               >
@@ -94,9 +95,9 @@ const CategoryProductsComponent = () => {
                     No Image
                   </div>
                 )}
-                <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
+                <h3 className="text-xl font-semibold mb-2 overflow-hidden text-ellipsis whitespace-nowrap">{product.name}</h3> {/* Apply overflow to name */}
                 <p className="text-lg font-medium text-gray-700 mb-1">Rs.{product.price}</p>
-                <p className="text-gray-500 overflow-hidden text-ellipsis h-12">{product.description}</p>
+                <p className="text-gray-500 overflow-hidden text-ellipsis h-12">{product.description}</p> {/* Apply overflow to description */}
               </motion.div>
             ))
           ) : (
