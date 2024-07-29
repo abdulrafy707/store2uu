@@ -6,7 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FiPlus, FiMinus, FiTrash2 } from 'react-icons/fi';
 import axios from 'axios';
-import {jwt_decode} from 'jsonwebtoken';
+import { jwt_decode } from 'jsonwebtoken';
 
 const CartPage = () => {
   const [cart, setCart] = useState([]);
@@ -89,9 +89,9 @@ const CartPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container bg-white mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
-        <div className="w-full lg:w-3/5">
+        <div className="w-full lg:w-3/5 border border-gray-400 p-4"> {/* Add border class */}
           <h2 className="text-2xl font-semibold mb-6">Your Cart</h2>
           <div className="flex flex-col gap-4">
             {cart.map((item, index) => (
@@ -137,12 +137,12 @@ const CartPage = () => {
             ))}
           </div>
         </div>
-        <div className="w-full lg:w-2/5">
+        <div className="w-full lg:w-2/5 border border-gray-400 p-4"> {/* Add border class */}
           <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
           <div className="bg-white shadow-lg rounded-lg p-4 flex flex-col gap-2">
             <div className="flex justify-between">
-              <p className="text-md font-medium text-gray-700">Subtotal:</p>
-              <p className="text-md text-gray-700">Rs.{total - tax - deliveryCharge}</p>
+              <p className="text-xl font-bold text-gray-700">Subtotal:</p>
+              <p className="text- text-gray-700">Rs.{total - tax - deliveryCharge}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-md font-medium text-gray-700">Tax (10%):</p>
@@ -152,8 +152,9 @@ const CartPage = () => {
               <p className="text-md font-medium text-gray-700">Delivery Charge:</p>
               <p className="text-md text-gray-700">Rs.{deliveryCharge}</p>
             </div>
+            <hr className='h-2'></hr>
             <div className="flex justify-between">
-              <p className="text-md font-medium text-gray-700">Total:</p>
+              <p className="text-xl font-bold text-gray-700">Total:</p>
               <p className="text-md text-gray-700">Rs.{total}</p>
             </div>
             <button

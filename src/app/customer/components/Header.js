@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FiSearch, FiShoppingCart, FiUser, FiMenu } from 'react-icons/fi';
+import { FiSearch, FiShoppingCart } from 'react-icons/fi';
+import { MdExpandMore } from 'react-icons/md';
 import Link from 'next/link';
 
 const Header = () => {
   const [categories, setCategories] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [hoveredCategory, setHoveredCategory] = useState(null);
   const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
@@ -34,97 +34,65 @@ const Header = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
+  const visibleCategories = categories.slice(0, 5);
+  const hiddenCategories = categories.slice(5);
+
   return (
-    <header className="bg-white shadow-sm py-4 relative">
-      <div className="container text-2xl pl-10 mx-auto flex items-center justify-between">
-        <div className="flex items-center">
-          <img src="/logo.jpg" alt="Logo" className="h-15 w-20 mr-4" />
-          <button
-            onClick={toggleDropdown}
-            className="flex items-center text-gray-700 hover:text-blue-500 transition-colors duration-300"
-          >
-            <FiMenu className="mr-2" />
-            Departments
-          </button>
-          <nav className="ml-6 flex space-x-4">
-            {categories.map((category) => (
-              <Link key={category.id} href={`/customer/pages/category/${category.id}`} className="text-gray-700 hover:text-blue-500 transition-colors duration-300">
+    <header className="bg-white py-4 relative">
+      <div className="container mx-auto flex items-center justify-between">
+        <div className="flex w-full items-center">
+          <img src="/logo.jpg" alt="Logo" className="h-10 w-[200px] mr-6" />
+          <nav className="flex text-[19px] mx-auto w-[1000px] text-center pl-8 space-x-8">
+            {visibleCategories.map((category) => (
+              <Link key={category.id} href={`/customer/pages/category/${category.id}`} className="relative group text-gray-700 transition-colors duration-300 text-center ">
                 {category.name}
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-blue-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
             ))}
+            {hiddenCategories.length > 0 && (
+              <div className="relative">
+                <button
+                  onClick={toggleDropdown}
+                  className="flex items-center text-gray-700 hover:text-blue-500 transition-colors duration-300 text-center"
+                >
+                  More <MdExpandMore />
+                </button>
+                {isDropdownOpen && (
+                  <div className="absolute mt-2 w-48 bg-white border border-gray-200 shadow-lg z-10">
+                    <div className="py-2">
+                      {hiddenCategories.map((category) => (
+                        <Link
+                          key={category.id}
+                          href={`/customer/pages/category/${category.id}`}
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        >
+                          {category.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </nav>
         </div>
         <div className="flex items-center space-x-4">
           <div className="relative flex items-center">
-            <FiSearch className="text-gray-700 hover:text-blue-500 transition-colors duration-300" />
-          </div>
-          <div className="relative flex items-center">
-            <FiUser className="text-gray-700 hover:text-blue-500 transition-colors duration-300" />
+            <input
+              type="text"
+              placeholder="What you looking for"
+              className="border rounded-full py-1 px-4 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <FiSearch className="absolute right-2 text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-300" />
           </div>
           <div className="relative flex items-center">
             <Link href="/customer/pages/cart">
-              <FiShoppingCart className="text-gray-700 cursor-pointer hover:text-blue-500 transition-colors duration-300" />
+              <FiShoppingCart className="text-gray-700 cursor-pointer w-[50px] h[50px] hover:text-blue-500 transition-colors duration-300" />
             </Link>
-            <span className="absolute -top-2 -right-2 bg-teal-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{cartCount}</span>
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{cartCount}</span>
           </div>
         </div>
       </div>
-      {isDropdownOpen && (
-        <div className="absolute left-0 mt-2 w-3/4 bg-blue-50 border border-gray-200 shadow-lg z-10">
-          <div className="container mx-auto py-4 flex">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="flex flex-col bg-white p-4 rounded-l-lg">
-                {categories.map((category) => (
-                  <Link
-                    key={category.id}
-                    href={`/customer/pages/category/${category.id}`}
-                    className="flex items-center p-2 hover:bg-gray-100 cursor-pointer"
-                    onMouseEnter={() => setHoveredCategory(category.id)}
-                    onMouseLeave={() => setHoveredCategory(null)}
-                  >
-                    <img
-                      src={`https://appstore.store2u.ca/uploads/${category.imageUrl}`}
-                      alt={category.name}
-                      className="h-8 w-8 rounded-full mr-2"
-                      onError={(e) => {
-                        console.error(`Failed to load image: ${e.target.src}`);
-                        e.target.onerror = null;
-                        e.target.src = '/fallback-image.jpg'; // Replace with a path to a fallback image
-                      }}
-                    />
-                    <span>{category.name}</span>
-                  </Link>
-                ))}
-              </div>
-              <div className="col-span-2 flex flex-col bg-blue-100 p-4 rounded-r-lg">
-                {hoveredCategory && (
-                  <div className="grid grid-cols-2 gap-4">
-                    {categories.find(cat => cat.id === hoveredCategory)?.subcategories.map((subcategory) => (
-                      <Link
-                        key={subcategory.id}
-                        href={`/customer/pages/category/${hoveredCategory}#subcategory-${subcategory.id}`}
-                        className="flex items-center p-2 hover:bg-gray-200 cursor-pointer rounded-md"
-                      >
-                        <img
-                          src={`https://appstore.store2u.ca/uploads/${subcategory.imageUrl}`}
-                          alt={subcategory.name}
-                          className="h-8 w-8 rounded-full mr-2"
-                          onError={(e) => {
-                            console.error(`Failed to load image: ${e.target.src}`);
-                            e.target.onerror = null;
-                            e.target.src = '/fallback-image.jpg'; // Replace with a path to a fallback image
-                          }}
-                        />
-                        <span>{subcategory.name}</span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   );
 };

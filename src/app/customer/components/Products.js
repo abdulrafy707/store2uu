@@ -43,7 +43,7 @@ const Products = () => {
   };
 
   return (
-    <section className="py-8">
+    <section className="py-8 bg-white">
       <div className="container mx-auto">
         {categories.map((category) => (
           <div key={category.id} className="mb-12">
@@ -60,7 +60,7 @@ const Products = () => {
                     No Image
                   </div>
                 )}
-                <h3 className="text-2xl font-bold mt-4">{category.name}</h3>
+                <h3 className="text-2xl text-gray-800 font-normal mt-4">{category.name}</h3>
                 <p className="text-gray-500 mt-2">{category.description}</p>
               </div>
               <div className="w-3/4">
@@ -69,7 +69,7 @@ const Products = () => {
                   <FiChevronLeft className="h-6 w-6 text-gray-500 cursor-pointer" />
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {products
-                      .filter(product => 
+                      .filter(product =>
                         category.subcategories.some(subcat => subcat.id === product.subcategoryId)
                       )
                       .map((product) => (
@@ -95,9 +95,9 @@ const Products = () => {
                           <div className="absolute top-2 right-2">
                             <FiPlusCircle className="h-6 w-6 text-teal-500 cursor-pointer" />
                           </div>
-                          <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
+                          <h3 className="text-xl mb-2 overflow-hidden text-ellipsis whitespace-nowrap">{product.name}</h3>
                           <p className="text-lg font-medium text-gray-700 mb-1">Rs.{product.price}</p>
-                          <p className="text-gray-500 overflow-hidden text-ellipsis h-12">{product.description}</p>
+                          <p className="text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap">{product.description}</p>
                         </div>
                       ))}
                   </div>

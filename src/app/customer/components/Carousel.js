@@ -23,7 +23,7 @@ const slides = [
 
 function Slider() {
   return (
-    <div className="relative slide-container text-black" style={{ height: '400px' }}>
+    <div className="relative slide-container bg-white text-black" style={{ height: '400px' }}>
       <Zoom scale={0.4} duration={2000} autoPlay={true}>
         {slides.map((slide, index) => (
           <div key={index} className="relative h-full">

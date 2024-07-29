@@ -81,7 +81,7 @@ const CategoryPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto bg-white px-4 py-8">
       <h2 className="text-2xl font-semibold mb-6">{category.name}</h2>
       <div className="flex space-x-4 mb-6 overflow-x-auto">
         <button
@@ -130,7 +130,7 @@ const CategoryPage = () => {
         {filteredProducts.map((product) => (
           <div
             key={product.id}
-            className="bg-white shadow-md rounded-lg p-4 relative cursor-pointer"
+            className="bg-white shadow-md rounded-lg p-4 relative cursor-pointer h-80 flex flex-col justify-between"
             onClick={() => handleProductClick(product.id)}
           >
             {product.images && product.images.length > 0 ? (
@@ -147,9 +147,9 @@ const CategoryPage = () => {
                 No Image
               </div>
             )}
-            <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
+            <h3 className="text-xl font-semibold mb-2 overflow-hidden text-ellipsis whitespace-nowrap">{product.name}</h3>
             <p className="text-lg font-medium text-gray-700 mb-1">Rs.{product.price}</p>
-            <p className="text-gray-500">{product.description}</p>
+            <p className="text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap">{product.description}</p>
           </div>
         ))}
       </div>

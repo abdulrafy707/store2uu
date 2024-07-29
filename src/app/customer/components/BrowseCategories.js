@@ -37,7 +37,7 @@ const BrowseCategories = () => {
   }, []);
 
   return (
-    <div className={`bg-gray-100 py-4 ${isSticky ? 'fixed top-0 left-0 w-full z-50 shadow-lg' : ''}`}>
+    <div className={`bg-white py-4 ${isSticky ? 'fixed top-0 left-0 w-full z-50 shadow-lg' : ''}`}>
       <div className="container mx-auto flex justify-between items-center">
         <div className="relative">
           <button

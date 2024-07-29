@@ -29,7 +29,7 @@ const Sidebar = ({ setActiveComponent }) => {
     <div className="bg-blue-900 text-white w-64 min-h-screen flex flex-col">
       <div className="p-4 text-center">
         <img width={50} height={50} src="/ali.png" alt="Profile" className="rounded-full mx-auto mb-2" />
-        <h2 className="text-lg font-semibold">M3X Traders</h2>
+        <h2 className="text-lg font-semibold">Store2u</h2>
         <p className="text-green-400">● Online</p>
       </div>
       <div className="p-4 border-t border-gray-700">

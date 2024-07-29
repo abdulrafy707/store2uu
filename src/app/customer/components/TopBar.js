@@ -12,15 +12,17 @@ const TopBar = () => {
         <div className="flex space-x-4 text-blue-500">
           <a href="#" className="hover:underline">Become Seller</a>
           <a href="#" className="hover:underline">Affiliation Program</a>
-          <motion.div
-            className="flex items-center space-x-2 text-gray-500"
-            animate={{ x: ['100%', '-100%'] }}
+          <div className='w-[750px] mx-auto overflow-x-hidden px-4'>
+            <motion.div
+            className="flex items-center space-x-2 mx-4 text-gray-500"
+            animate={{ x: ['100%', '-80%'] }}
             transition={{ repeat: Infinity, duration: 20, ease: 'linear' }}
           >
             <FiChevronRight />
             <span>Get great devices up to 50% off</span>
             <a href="#" className="text-blue-500 hover:underline">View details</a>
           </motion.div>
+          </div>
         </div>
         <div className="flex items-center space-x-4 text-gray-500">
           <span>Need help? Call Us: <a href="tel:+923128807795" className="text-blue-500 hover:underline">+92 312 8807795</a></span>
