@@ -4,7 +4,9 @@ import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
 import Select from 'react-select';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-import ReactQuill from 'react-quill';
+import dynamic from 'next/dynamic';
+
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 import 'react-quill/dist/quill.snow.css';
 
 const FilterableTable = ({ products, fetchProducts, categories, subcategories }) => {
@@ -27,7 +29,7 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
     image: null, // Image file
     imageUrl: '', // Image URL
   });
-  
+
   const [images, setImages] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
   const fileInputRef = useRef(null);
@@ -58,7 +60,7 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
       return;
     }
     setIsLoading(true);
-  
+
     try {
       const uploadedImages = await Promise.all(images.map(async (img) => {
         const imageBase64 = await convertToBase64(img);
@@ -76,10 +78,13 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
           throw new Error(result.error || 'Failed to upload image');
         }
       }));
-  
-      const quill = document.querySelector('.ql-editor'); // Get the Quill editor element
-      const plainText = quill ? quill.innerText : ''; // Extract plain text from the Quill editor
-  
+
+      let plainText = '';
+      if (typeof window !== 'undefined') {
+        const quill = document.querySelector('.ql-editor'); // Get the Quill editor element
+        plainText = quill ? quill.innerText : ''; // Extract plain text from the Quill editor
+      }
+
       const productToSubmit = {
         ...newProduct,
         description: plainText,  // Use plain text as description
@@ -90,7 +95,7 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
         sizes: JSON.stringify(newProduct.sizes.map(size => size.value)),
         images: uploadedImages,
       };
-  
+
       const response = newProduct.id 
         ? await fetch(`/api/products/${newProduct.id}`, {
             method: 'PUT',
@@ -106,7 +111,7 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
             },
             body: JSON.stringify(productToSubmit),
           });
-  
+
       if (response.ok) {
         fetchProducts(); // Refresh the data after adding/updating
         setIsModalOpen(false);
@@ -134,8 +139,6 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
     }
     setIsLoading(false);
   };
-  
-  
 
   const handleDeleteItem = async (id) => {
     setIsLoading(true);
@@ -175,7 +178,7 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
       const response = await fetch(`/api/products/${item.id}`);
       const productData = await response.json();
       const productImages = productData.images || [];
-  
+
       // Update product and existing images state
       setNewProduct({
         ...item,
@@ -192,8 +195,6 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
     }
     setIsLoading(false);
   };
-  
-  
 
   const convertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -330,8 +331,6 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
     </tr>
   ))}
 </tbody>
-
-
           </table>
         </div>
       </div>
