@@ -4,6 +4,8 @@ import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
 import Select from 'react-select';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const FilterableTable = ({ products, fetchProducts, categories, subcategories }) => {
   const [filter, setFilter] = useState('');
@@ -15,7 +17,7 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
   const [newProduct, setNewProduct] = useState({
     id: null,
     name: '',
-    description: '',
+    richDescription: '',
     price: '',
     stock: '',
     categoryId: '',
@@ -25,6 +27,7 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
     image: null, // Image file
     imageUrl: '', // Image URL
   });
+  
   const [images, setImages] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
   const fileInputRef = useRef(null);
@@ -50,11 +53,12 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
   }, [newProduct.categoryId, subcategories]);
 
   const handleAddNewItem = async () => {
-    if (!newProduct.name || !newProduct.description || !newProduct.price || !newProduct.stock || !newProduct.subcategoryId) {
+    if (!newProduct.name || !newProduct.richDescription || !newProduct.price || !newProduct.stock || !newProduct.subcategoryId) {
       alert("All fields are required");
       return;
     }
     setIsLoading(true);
+  
     try {
       const uploadedImages = await Promise.all(images.map(async (img) => {
         const imageBase64 = await convertToBase64(img);
@@ -72,9 +76,13 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
           throw new Error(result.error || 'Failed to upload image');
         }
       }));
-
+  
+      const quill = document.querySelector('.ql-editor'); // Get the Quill editor element
+      const plainText = quill ? quill.innerText : ''; // Extract plain text from the Quill editor
+  
       const productToSubmit = {
         ...newProduct,
+        description: plainText,  // Use plain text as description
         price: parseFloat(newProduct.price),
         stock: parseInt(newProduct.stock),
         subcategoryId: parseInt(newProduct.subcategoryId),
@@ -82,7 +90,7 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
         sizes: JSON.stringify(newProduct.sizes.map(size => size.value)),
         images: uploadedImages,
       };
-
+  
       const response = newProduct.id 
         ? await fetch(`/api/products/${newProduct.id}`, {
             method: 'PUT',
@@ -98,14 +106,14 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
             },
             body: JSON.stringify(productToSubmit),
           });
-
+  
       if (response.ok) {
         fetchProducts(); // Refresh the data after adding/updating
         setIsModalOpen(false);
         setNewProduct({
           id: null,
           name: '',
-          description: '',
+          richDescription: '',  // Reset richDescription
           price: '',
           stock: '',
           categoryId: '',
@@ -126,6 +134,8 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
     }
     setIsLoading(false);
   };
+  
+  
 
   const handleDeleteItem = async (id) => {
     setIsLoading(true);
@@ -165,7 +175,7 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
       const response = await fetch(`/api/products/${item.id}`);
       const productData = await response.json();
       const productImages = productData.images || [];
-
+  
       // Update product and existing images state
       setNewProduct({
         ...item,
@@ -173,6 +183,7 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
         sizes: Array.isArray(item.sizes) ? item.sizes.map(size => ({ value: size, label: size })) : [],
         image: null, // Reset image for edit
         imageUrl: item.imageUrl, // Existing image URL
+        richDescription: item.richDescription || '', // Use the existing description as richDescription
       });
       setExistingImages(productImages.map(img => img.url));
       setIsModalOpen(true);
@@ -181,6 +192,8 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
     }
     setIsLoading(false);
   };
+  
+  
 
   const convertToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -242,6 +255,7 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
                   sizes: [],
                   image: null,
                   imageUrl: '',
+                  richDescription: '',
                 });
                 setImages([]);
                 setExistingImages([]);
@@ -269,47 +283,55 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="w-[10px] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated At</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {Array.isArray(filteredData) && filteredData.map((item, index) => (
-                <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {item.images && item.images.length > 0 ? (
-                      <img src={`https://appstore.store2u.ca/uploads/${item.images[0].url}`} alt={item.name} className="w-12 h-12 object-cover" />
-                    ) : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.description}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.price}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.stock}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(item.createdAt).toLocaleString()}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(item.updatedAt).toLocaleString()}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => handleEditItem(item)}
-                      className="text-indigo-600 hover:text-indigo-900 transition duration-150 ease-in-out"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteItem(item.id)}
-                      className="text-red-600 hover:text-red-900 transition duration-150 ease-in-out"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+  {Array.isArray(filteredData) && filteredData.map((item, index) => (
+    <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {item.images && item.images.length > 0 ? (
+          <img src={`https://appstore.store2u.ca/uploads/${item.images[0].url}`} alt={item.name} className="w-12 h-12 object-cover" />
+        ) : 'N/A'}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.id}</td>
+      <td className="px-6 py-4 text-sm text-gray-500 max-w-[50px]">
+        <div className="overflow-hidden whitespace-normal">
+          {item.name}
+        </div>
+      </td>
+      <td className="px-6 py-4 text-sm text-gray-500 max-w-[50px]">
+        <div className="overflow-hidden whitespace-normal">
+          {item.description}  {/* Show plain text description */}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.price}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.stock}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(item.updatedAt).toLocaleString()}</td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+        <button
+          onClick={() => handleEditItem(item)}
+          className="text-indigo-600 hover:text-indigo-900 transition duration-150 ease-in-out"
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => handleDeleteItem(item.id)}
+          className="text-red-600 hover:text-red-900 transition duration-150 ease-in-out"
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
+
           </table>
         </div>
       </div>
@@ -335,8 +357,9 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
               <TabList>
                 <Tab>Details</Tab>
                 <Tab>Images</Tab>
+                <Tab>Rich Text</Tab>
               </TabList>
-            <div className='h-[80vh] overflow-y-auto'>
+            <div className='h-[60vh] overflow-y-auto'>
               <TabPanel>
                 <h2 className="text-xl mb-4 ">{newProduct.id ? 'Edit Product' : 'Add New Product'}</h2>
                 <div className="mb-4 ">
@@ -383,15 +406,6 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
                     type="text"
                     value={newProduct.name}
                     onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                    className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
-                  <input
-                    type="text"
-                    value={newProduct.description}
-                    onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
                     className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -490,6 +504,25 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
         ))}
       </div>
     )}
+  </div>
+</TabPanel>
+
+<TabPanel>
+  <h2 className="text-xl mb-4">Rich Text Description</h2>
+  <div className="mb-4">
+    <input
+      type="text"
+      value={newProduct.description}
+      onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+      className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+  <div className="mb-4">
+    <ReactQuill
+      value={newProduct.richDescription}
+      onChange={(value) => setNewProduct({ ...newProduct, richDescription: value })}
+      className="h-64"
+    />
   </div>
 </TabPanel>
 

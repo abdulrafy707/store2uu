@@ -34,6 +34,35 @@ export async function POST(request) {
   }
 }
 
+
+// export async function GET(request) {
+//   const { searchParams } = new URL(request.url);
+//   const categoryId = searchParams.get('categoryId');
+
+//   try {
+//     const subcategories = await prisma.subcategory.findMany({
+//       where: {
+//         categoryId: parseInt(categoryId, 10)
+//       },
+//       include: {
+//         category: true,
+//       },
+//     });
+
+//     return NextResponse.json(subcategories);
+//   } catch (error) {
+//     console.error('Error fetching subcategories:', error);
+//     return NextResponse.json(
+//       {
+//         message: 'Failed to fetch subcategories',
+//         status: false,
+//         error: error.message,
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
+
 export async function GET() {
   try {
     const subcategories = await prisma.subcategory.findMany({

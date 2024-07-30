@@ -2,24 +2,46 @@ import { NextResponse } from 'next/server';
 
 import prisma from '../../../util/prisma';
 // Get category by ID
+
 export async function GET(request, { params }) {
   try {
-    const id = parseInt(params.id, 10);
-    const category = await prisma.category.findUnique({
-      where: { id },
-      include: {
-        subcategories: true,
-      },
-    });
+    const { searchParams } = new URL(request.url);
+    const id = params.id ? parseInt(params.id, 10) : parseInt(searchParams.get('categoryId'), 10);
 
-    if (!category) {
+    if (!id) {
       return NextResponse.json(
-        { message: 'Category not found', status: false },
-        { status: 404 }
+        { message: 'Category ID is required', status: false },
+        { status: 400 }
       );
     }
 
-    return NextResponse.json(category);
+    let categories;
+
+    if (id) {
+      // Fetch the specific category by its ID, including its subcategories
+      categories = await prisma.category.findUnique({
+        where: { id },
+        include: {
+          subcategories: true,
+        },
+      });
+
+      if (!categories) {
+        return NextResponse.json(
+          { message: 'Category not found', status: false },
+          { status: 404 }
+        );
+      }
+    } else {
+      // Fetch all categories with their subcategories if no ID is provided
+      categories = await prisma.category.findMany({
+        include: {
+          subcategories: true,
+        },
+      });
+    }
+
+    return NextResponse.json(categories);
   } catch (error) {
     console.error('Error fetching category:', error);
     return NextResponse.json(
@@ -28,6 +50,7 @@ export async function GET(request, { params }) {
     );
   }
 }
+
 
 // Update an existing category
 export async function PUT(request, { params }) {

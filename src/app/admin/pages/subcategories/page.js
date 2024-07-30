@@ -12,7 +12,7 @@ const SubcategoriesPage = () => {
       const response = await fetch('/api/subcategories');
       const result = await response.json();
       setSubcategories(result);
-      console.log(subcategories)
+      console.log('Subcategories:', result); // Logging the fetched subcategories
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching subcategories:', error);
@@ -25,6 +25,7 @@ const SubcategoriesPage = () => {
       const response = await fetch('/api/categories');
       const result = await response.json();
       setCategories(result);
+      console.log('Categories:', result); // Logging the fetched categories
     } catch (error) {
       console.error('Error fetching categories:', error);
     }

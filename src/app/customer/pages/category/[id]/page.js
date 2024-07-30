@@ -3,8 +3,27 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-
 import { motion } from 'framer-motion';
+
+const fetchSubcategoriesByCategoryId = async (categoryId) => {
+  try {
+    const response = await axios.get(`/api/subcategories/${categoryId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching subcategories:', error);
+    return [];
+  }
+};
+
+const fetchProductsBySubcategoryIds = async (subcategoryIds) => {
+  try {
+    const response = await axios.get(`/api/products?subcategoryIds=${subcategoryIds.join(',')}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return [];
+  }
+};
 
 const CategoryPage = () => {
   const { id } = useParams();
@@ -23,17 +42,23 @@ const CategoryPage = () => {
         const categoryResponse = await axios.get(`/api/categories/${id}`);
         setCategory(categoryResponse.data);
 
-        const subcategoriesResponse = await axios.get(`/api/subcategories?categoryId=${id}`);
-        setSubcategories(subcategoriesResponse.data);
+        const subcategoriesData = await fetchSubcategoriesByCategoryId(id);
+        setSubcategories(subcategoriesData);
 
-        const productsResponse = await axios.get(`/api/products?categoryId=${id}`);
-        const productsData = productsResponse.data;
-        setProducts(productsData);
-        setFilteredProducts(productsData);
+        if (subcategoriesData.length > 0) {
+          const subcategoryIds = subcategoriesData.map(subcategory => subcategory.id);
+          const productsData = await fetchProductsBySubcategoryIds(subcategoryIds);
+          setProducts(productsData);
+          setFilteredProducts(productsData);
 
-        const highestProductPrice = Math.max(...productsData.map(product => product.price));
-        setHighestPrice(highestProductPrice);
-        setPriceRange({ min: 0, max: highestProductPrice });
+          const highestProductPrice = Math.max(...productsData.map(product => product.price));
+          setHighestPrice(highestProductPrice);
+          setPriceRange({ min: 0, max: highestProductPrice });
+
+          console.log(`These are the subcategories of category ID ${id}:`, subcategoriesData);
+        } else {
+          console.log(`Category ID ${id} has no subcategories.`);
+        }
       } catch (error) {
         console.error('Error fetching category data:', error);
       }
@@ -51,7 +76,9 @@ const CategoryPage = () => {
 
   const handleShowAllProducts = () => {
     setSelectedSubcategory(null);
-    filterProducts(null, priceRange);
+    const subcategoryIds = subcategories.map(subcategory => subcategory.id);
+    const allSubcategoryProducts = products.filter(product => subcategoryIds.includes(product.subcategoryId));
+    setFilteredProducts(allSubcategoryProducts);
   };
 
   const handlePriceFilterChange = (min, max) => {
@@ -109,7 +136,7 @@ const CategoryPage = () => {
               <input
                 type="number"
                 value={priceRange.min}
-                onChange={(e) => handlePriceFilterChange(e.target.value, priceRange.max)}
+                onChange={(e) => handlePriceFilterChange(Number(e.target.value), priceRange.max)}
                 className="border border-gray-300 p-2 rounded"
                 placeholder="From"
               />
@@ -117,7 +144,7 @@ const CategoryPage = () => {
               <input
                 type="number"
                 value={priceRange.max}
-                onChange={(e) => handlePriceFilterChange(priceRange.min, e.target.value)}
+                onChange={(e) => handlePriceFilterChange(priceRange.min, Number(e.target.value))}
                 className="border border-gray-300 p-2 rounded"
                 placeholder="To"
               />

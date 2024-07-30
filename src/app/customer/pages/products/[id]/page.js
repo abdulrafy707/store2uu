@@ -23,12 +23,9 @@ const ProductPage = () => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(`/api/products/${id}`);
-        const { product } = response.data;
+        const { product, relatedProducts } = response.data;
         setProduct(product);
-
-        // Fetch related products based on the category of the current product
-        const relatedProductsResponse = await axios.get(`/api/products?subcategory=${product.subcategoryId}`);
-        setRelatedProducts(relatedProductsResponse.data);
+        setRelatedProducts(relatedProducts);
       } catch (error) {
         console.error('Error fetching product:', error);
       }
@@ -130,7 +127,6 @@ const ProductPage = () => {
                   src={getImageUrl(product.images[currentImageIndex].url)}
                   alt={product.name}
                   className="w-full h-[400px] object-cover mb-4 cursor-pointer"
-                  // whileHover={{ scale: 1.1 }}
                   transition={{ duration: 0.3 }}
                   onClick={handleImageClick} // Add click handler
                 />
@@ -166,39 +162,41 @@ const ProductPage = () => {
       </div>
 
       <div className="mt-12">
-  <h3 className="text-2xl font-semibold pl-6 ml-6 mb-6">Related Products</h3>
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-5 px-10 gap-4"> {/* Set gap to 0 */}
-    {relatedProducts.map((relatedProduct) => (
-      <div
-        key={relatedProduct.id}
-        className="bg-white shadow-md rounded-lg relative cursor-pointer px-5 w-64 h-80 m-0" // Set fixed width, height, and remove margin
-        onClick={() => handleRelatedProductClick(relatedProduct.id)}
-      >
-        {relatedProduct.images && relatedProduct.images.length > 0 ? (
-          <motion.img
-            src={getImageUrl(relatedProduct.images[0].url)}
-            alt={relatedProduct.name}
-            className="h-32 w-full object-cover mb-4 rounded"
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.3 }}
-            onError={(e) => { e.target.onerror = null; e.target.src = '/default-image.png'; }} // Fallback image
-          />
-        ) : (
-          <div className="h-32 w-full bg-gray-200 mb-4 rounded flex items-center justify-center text-gray-500">
-            No Image
-          </div>
-        )}
-        <div className="absolute top-2 right-2">
-          <FiPlusCircle className="h-6 w-6 text-teal-500 cursor-pointer" onClick={() => addToCart(relatedProduct)} />
+        <h3 className="text-2xl font-semibold pl-6 ml-6 mb-6">Related Products</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-5 px-10 gap-4">
+          {relatedProducts.map((relatedProduct) => (
+            <div
+              key={relatedProduct.id}
+              className="bg-white shadow-md rounded-lg relative cursor-pointer px-5 w-64 h-80 m-0"
+              onClick={() => handleRelatedProductClick(relatedProduct.id)}
+            >
+              {relatedProduct.images && relatedProduct.images.length > 0 ? (
+                <motion.img
+                  src={getImageUrl(relatedProduct.images[0].url)}
+                  alt={relatedProduct.name}
+                  className="h-32 w-full object-cover mb-4 rounded"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.3 }}
+                  onError={(e) => { e.target.onerror = null; e.target.src = '/default-image.png'; }} // Fallback image
+                />
+              ) : (
+                <div className="h-32 w-full bg-gray-200 mb-4 rounded flex items-center justify-center text-gray-500">
+                  No Image
+                </div>
+              )}
+              <div className="absolute top-2 right-2">
+                <FiPlusCircle className="h-6 w-6 text-teal-500 cursor-pointer" onClick={(e) => {
+                  e.stopPropagation();
+                  addToCart(relatedProduct);
+                }} />
+              </div>
+              <h3 className="text-xl mb-2 overflow-hidden text-ellipsis whitespace-nowrap">{relatedProduct.name}</h3>
+              <p className="text-lg font-medium text-gray-700 mb-1">Rs.{relatedProduct.price}</p>
+              <p className="text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap">{relatedProduct.description}</p>
+            </div>
+          ))}
         </div>
-        <h3 className="text-xl mb-2 overflow-hidden text-ellipsis whitespace-nowrap">{relatedProduct.name}</h3> {/* Apply overflow to name */}
-        <p className="text-lg font-medium text-gray-700 mb-1">Rs.{relatedProduct.price}</p>
-        <p className="text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap">{relatedProduct.description}</p> {/* Apply overflow to description */}
       </div>
-    ))}
-  </div>
-</div>
-
 
       <button
         onClick={() => setCartVisible(true)}

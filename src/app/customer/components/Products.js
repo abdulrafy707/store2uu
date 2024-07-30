@@ -9,21 +9,27 @@ import { FiPlusCircle, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 const Products = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchCategoriesAndProducts = async () => {
+    const fetchCategoriesAndSubcategories = async () => {
       try {
         // Fetch categories
         const categoryResponse = await axios.get('/api/categories');
-        const categories = categoryResponse.data;
-        setCategories(categories);
+        const categoriesData = categoryResponse.data;
+        setCategories(categoriesData);
+
+        // Fetch subcategories
+        const subcategoryResponse = await axios.get('/api/subcategories');
+        const subcategoriesData = subcategoryResponse.data;
+        setSubcategories(subcategoriesData);
 
         // Fetch products
         const productsResponse = await axios.get('/api/products');
-        const products = productsResponse.data;
-        setProducts(products);
+        const productsData = productsResponse.data;
+        setProducts(productsData);
 
         setLoading(false);
       } catch (error) {
@@ -31,7 +37,7 @@ const Products = () => {
         setLoading(false);
       }
     };
-    fetchCategoriesAndProducts();
+    fetchCategoriesAndSubcategories();
   }, []);
 
   if (loading) {
@@ -45,68 +51,78 @@ const Products = () => {
   return (
     <section className="py-8 bg-white">
       <div className="container mx-auto">
-        {categories.map((category) => (
-          <div key={category.id} className="mb-12">
-            <div className="flex">
-              <div className="w-1/4 pr-4">
-                {category.imageUrl ? (
-                  <img
-                    src={`https://appstore.store2u.ca/uploads/${category.imageUrl}`}
-                    alt={category.name}
-                    className="w-full h-[400px] rounded-lg shadow-md"
-                  />
-                ) : (
-                  <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
-                    No Image
-                  </div>
-                )}
-                <h3 className="text-2xl text-gray-800 font-normal mt-4">{category.name}</h3>
-                <p className="text-gray-500 mt-2">{category.description}</p>
-              </div>
-              <div className="w-3/4">
-                <h2 className="text-3xl font-bold mb-6">{category.name} Products</h2>
-                <div className="flex justify-between items-center mb-6">
-                  <FiChevronLeft className="h-6 w-6 text-gray-500 cursor-pointer" />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {products
-                      .filter(product =>
-                        category.subcategories.some(subcat => subcat.id === product.subcategoryId)
-                      )
-                      .map((product) => (
-                        <div
-                          key={product.id}
-                          className="bg-white shadow-md rounded-lg p-4 relative cursor-pointer h-72"
-                          onClick={() => handleProductClick(product.id)}
-                        >
-                          {product.images && product.images.length > 0 ? (
-                            <motion.img
-                              src={`https://appstore.store2u.ca/uploads/${product.images[0].url}`}
-                              alt={product.name}
-                              className="h-32 w-full object-cover mb-4 rounded"
-                              whileHover={{ scale: 1.1 }}
-                              transition={{ duration: 0.3 }}
-                              onError={(e) => { e.target.onerror = null; e.target.src = '/default-image.png'; }} // Fallback image
-                            />
-                          ) : (
-                            <div className="h-32 w-full bg-gray-200 mb-4 rounded flex items-center justify-center text-gray-500">
-                              No Image
+        {categories.map((category) => {
+          // Find subcategories for the current category
+          const categorySubcategories = subcategories.filter(subcat => subcat.categoryId === category.id);
+
+          // Filter products that belong to these subcategories
+          const categoryProducts = products.filter(product =>
+            categorySubcategories.some(subcat => subcat.id === product.subcategoryId)
+          );
+
+          return (
+            <div key={category.id} className="mb-12">
+              <div className="flex">
+                <div className="w-1/4 pr-4">
+                  {category.imageUrl ? (
+                    <img
+                      src={`https://appstore.store2u.ca/uploads/${category.imageUrl}`}
+                      alt={category.name}
+                      className="w-full h-[400px] rounded-lg shadow-md"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
+                      No Image
+                    </div>
+                  )}
+                  <h3 className="text-2xl text-gray-800 font-normal mt-4">{category.name}</h3>
+                  <p className="text-gray-500 mt-2">{category.description}</p>
+                </div>
+                <div className="w-3/4">
+                  <h2 className="text-3xl font-bold mb-6">{category.name} Products</h2>
+                  <div className="flex justify-between items-center mb-6">
+                    <FiChevronLeft className="h-6 w-6 text-gray-500 cursor-pointer" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                      {categoryProducts.length > 0 ? (
+                        categoryProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            className="bg-white shadow-md rounded-lg p-4 relative cursor-pointer h-72"
+                            onClick={() => handleProductClick(product.id)}
+                          >
+                            {product.images && product.images.length > 0 ? (
+                              <motion.img
+                                src={`https://appstore.store2u.ca/uploads/${product.images[0].url}`}
+                                alt={product.name}
+                                className="h-32 w-full object-cover mb-4 rounded"
+                                whileHover={{ scale: 1.1 }}
+                                transition={{ duration: 0.3 }}
+                                onError={(e) => { e.target.onerror = null; e.target.src = '/default-image.png'; }} // Fallback image
+                              />
+                            ) : (
+                              <div className="h-32 w-full bg-gray-200 mb-4 rounded flex items-center justify-center text-gray-500">
+                                No Image
+                              </div>
+                            )}
+                            <div className="absolute top-2 right-2">
+                              <FiPlusCircle className="h-6 w-6 text-teal-500 cursor-pointer" />
                             </div>
-                          )}
-                          <div className="absolute top-2 right-2">
-                            <FiPlusCircle className="h-6 w-6 text-teal-500 cursor-pointer" />
+                            <h3 className="text-xl mb-2 overflow-hidden text-ellipsis whitespace-nowrap">{product.name}</h3>
+                            <p className="text-lg font-medium text-gray-700 mb-1">Rs.{product.price}</p>
+                            <p className="text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap">{product.description}</p>
                           </div>
-                          <h3 className="text-xl mb-2 overflow-hidden text-ellipsis whitespace-nowrap">{product.name}</h3>
-                          <p className="text-lg font-medium text-gray-700 mb-1">Rs.{product.price}</p>
-                          <p className="text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap">{product.description}</p>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <div className="text-center col-span-full py-8 text-gray-500">No products available in this category.</div>
+                      )}
+                    </div>
+                    <FiChevronRight className="h-6 w-6 text-gray-500 cursor-pointer" />
                   </div>
-                  <FiChevronRight className="h-6 w-6 text-gray-500 cursor-pointer" />
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

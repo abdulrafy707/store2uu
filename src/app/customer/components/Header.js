@@ -16,9 +16,14 @@ const Header = () => {
       try {
         const response = await fetch('/api/categories');
         const data = await response.json();
-        setCategories(data);
+        if (Array.isArray(data)) {
+          setCategories(data);
+        } else {
+          setCategories([]);
+        }
       } catch (error) {
         console.error('Error fetching categories:', error);
+        setCategories([]);
       }
     };
 

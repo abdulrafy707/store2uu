@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
 
-const FilterableTable = ({ subcategories, fetchSubcategories, categories }) => {
+const FilterableTable = ({ subcategories = [], fetchSubcategories, categories = [] }) => {
   const [filter, setFilter] = useState('');
-  const [filteredData, setFilteredData] = useState(subcategories || []);
+  const [filteredData, setFilteredData] = useState([]);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -16,13 +16,15 @@ const FilterableTable = ({ subcategories, fetchSubcategories, categories }) => {
   const [image, setImage] = useState(null);
 
   useEffect(() => {
-    setFilteredData(
-      (subcategories || []).filter((item) =>
-        Object.values(item).some((val) =>
-          String(val).toLowerCase().includes(filter.toLowerCase())
+    if (Array.isArray(subcategories)) {
+      setFilteredData(
+        subcategories.filter((item) =>
+          Object.values(item).some((val) =>
+            String(val).toLowerCase().includes(filter.toLowerCase())
+          )
         )
-      )
-    );
+      );
+    }
   }, [filter, subcategories]);
 
   const handleAddNewItem = async () => {
@@ -241,7 +243,7 @@ const FilterableTable = ({ subcategories, fetchSubcategories, categories }) => {
             {newSubcategory.imageUrl && (
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">Current Image</label>
-                <img src={newSubcategory.imageUrl} alt={newSubcategory.name} className="w-32 h-32 object-cover mb-2" />
+                <img src={`https://appstore.store2u.ca/uploads/${newSubcategory.imageUrl}`} alt={newSubcategory.name} className="w-32 h-32 object-cover mb-2" />
               </div>
             )}
             <div className="mb-4">
