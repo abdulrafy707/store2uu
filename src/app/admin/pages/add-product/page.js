@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Select from 'react-select';
 import dynamic from 'next/dynamic';
@@ -7,7 +7,7 @@ import 'react-quill/dist/quill.snow.css';
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
-const AddProductPage = () => {
+const AddProductPageContent = () => {
   const [newProduct, setNewProduct] = useState({
     id: null,
     name: '',
@@ -422,6 +422,14 @@ const AddProductPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const AddProductPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AddProductPageContent />
+    </Suspense>
   );
 };
 
