@@ -5,7 +5,7 @@ import { faBars, faBell, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 
 const Header = () => {
   return (
-    <header className="flex items-center justify-between bg-[#1B2A36] p-3">
+    <header className="flex items-center justify-between bg-gray-700 p-3">
       <div className="flex items-center">
         <button className="text-white text-xl px-2">
           <FontAwesomeIcon icon={faBars} />

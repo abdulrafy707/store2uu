@@ -12,6 +12,7 @@ const Register = () => {
     city: '',
     role: 'CUSTOMER', // or 'ADMIN'
     image: null,
+    base64: '',
   });
 
   const router = useRouter();
@@ -53,7 +54,7 @@ const Register = () => {
       });
 
       const data = await response.json();
-      if(data){
+      if (data) {
         router.push('/customer/pages/login');
       }
 

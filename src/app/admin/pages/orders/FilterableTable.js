@@ -1,5 +1,7 @@
+'use client'
 import { useState, useEffect } from 'react';
 import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
 
 const FilterableTable = ({ data, fetchData }) => {
   const [filter, setFilter] = useState('');
@@ -16,6 +18,8 @@ const FilterableTable = ({ data, fetchData }) => {
     image: null,
   });
 
+  const router = useRouter();
+
   useEffect(() => {
     setFilteredData(
       data.filter((item) =>
@@ -25,6 +29,10 @@ const FilterableTable = ({ data, fetchData }) => {
       )
     );
   }, [filter, data]);
+
+  const handleRowClick = (id) => {
+    router.push(`/admin/pages/orders/${id}`);
+  };
 
   const handleAddNewItem = async () => {
     setIsLoading(true);
@@ -130,7 +138,7 @@ const FilterableTable = ({ data, fetchData }) => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated At</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -138,27 +146,21 @@ const FilterableTable = ({ data, fetchData }) => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredData.map((item, index) => (
-                <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} onClick={() => handleRowClick(item.id)}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.id}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.userId}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.total}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.status}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {item.imageUrl ? (
-                      <img src={item.imageUrl} alt="Order Image" className="w-16 h-16 object-cover rounded" />
-                    ) : (
-                      'No image'
-                    )}
-                  </td>
+                  
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(item.createdAt).toLocaleString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(item.updatedAt).toLocaleString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => handleEditItem(item)}
+                    {/* <button
+                      onClick={(e) => { e.stopPropagation(); handleEditItem(item); }}
                       className="text-indigo-600 hover:text-indigo-900 transition duration-150 ease-in-out">Edit
-                    </button>
+                    </button> */}
                     <button
-                      onClick={() => handleDeleteItem(item.id)}
+                      onClick={(e) => { e.stopPropagation(); handleDeleteItem(item.id); }}
                       className="text-red-600 hover:text-red-900 transition duration-150 ease-in-out">Delete
                     </button>
                   </td>

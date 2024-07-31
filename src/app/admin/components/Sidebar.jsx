@@ -26,7 +26,7 @@ const Sidebar = ({ setActiveComponent }) => {
   };
 
   return (
-    <div className="bg-blue-900 text-white w-64 min-h-screen flex flex-col">
+    <div className="bg-gray-700 text-white w-64 min-h-screen flex flex-col">
       <div className="p-4 text-center">
         <img width={50} height={50} src="/ali.png" alt="Profile" className="rounded-full mx-auto mb-2" />
         <h2 className="text-lg font-semibold">Store2u</h2>
@@ -48,7 +48,7 @@ const Sidebar = ({ setActiveComponent }) => {
                 <li>
                   <a href='/admin/pages/customer'>
                     <button className="flex items-center p-2 hover:bg-blue-700 rounded">
-                      <span className="ml-2">View Customers</span>
+                      <span className="ml-2">Customers</span>
                     </button>
                   </a>
                 </li>

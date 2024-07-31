@@ -1,21 +1,16 @@
-'use client'
+'use client';
+
 import React from 'react';
-import Image from 'next/image';
-import { FaFacebookF, FaInstagram, FaYoutube } from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaYoutube, FaGooglePlay, FaApple } from 'react-icons/fa';
 
 const Footer = () => {
   return (
-    <footer className=" py-12 bg-white">
+    <footer className="py-12 bg-white">
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap justify-between items-center mb-12">
           <div className="w-full md:w-1/3 mb-8 md:mb-0">
-            <Image src="/path-to-logo.png" alt="Logo" width={150} height={75} />
+            <img src="/logo.jpg" alt="Logo" width={150} height={75} />
             <p className="mt-4 text-gray-600">Since 1941</p>
-          </div>
-          
-          
-          <div className="w-full md:w-1/3 text-center md:text-right">
-            
           </div>
         </div>
         <div className="flex flex-wrap justify-between">
@@ -28,13 +23,13 @@ const Footer = () => {
               <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">Contact Us</li>
               <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">Store Locator</li>
               <h2 className="text-lg font-semibold mb-2">DOWNLOAD THE APP</h2>
-            <div className="flex justify-center space-x-4">
-              <a href="https://play.google.com/store" className="transform hover:scale-105 transition duration-300">
-                <Image src="/playstore.png" alt="Google Play" width={100} height={20} />
-              </a>
-              <a href="https://www.apple.com/app-store" className="transform hover:scale-105 transition duration-300">
-                <Image src="/appstore.png" alt="App Store" width={100} height={20} />
-              </a>
+              <div className="flex justify-center space-x-4">
+                <a href="https://play.google.com/store" className="transform hover:scale-105 transition duration-300">
+                  <FaGooglePlay className="w-8 h-8 text-gray-600" />
+                </a>
+                <a href="https://www.apple.com/app-store" className="transform hover:scale-105 transition duration-300">
+                  <FaApple className="w-8 h-8 text-gray-600" />
+                </a>
               </div>
             </ul>
           </div>
@@ -51,11 +46,11 @@ const Footer = () => {
           </div>
           <div className="w-full md:w-1/3">
             <h2 className="text-lg font-semibold mb-4">Contact Information</h2>
-            <p className="mb-2 text-gray-600">Al-Fatah Head Office, 52B, Block E1, Adjacent Shapes Gym, Gulberg 3, Lahore, Pakistan</p>
+            <p className="mb-2 text-gray-600">Store2u Head Office, 52B, Block E1, Adjacent Shapes Gym, Gulberg 3, Lahore, Pakistan</p>
             <p className="mb-2 text-gray-600">For Queries and Complaints:</p>
             <p className="mb-2 text-gray-600">042-32307777 (9:00 AM TO 9:00 PM)</p>
             <p className="mb-2 text-gray-600">Whatsapp message only: 0311-1555222 (9:00 AM TO 9:00 PM)</p>
-            <p className="mb-2 text-gray-600">Email: info@alfatah.pk</p>
+            <p className="mb-2 text-gray-600">Email: info@store2u.pk</p>
             <h2 className="text-lg font-semibold mb-2">FOLLOW US ON</h2>
             <div className="flex justify-left md:justify-end space-x-4">
               <a href="https://www.facebook.com" className="text-gray-600 hover:text-blue-500 transform hover:scale-125 transition duration-300">
@@ -68,11 +63,10 @@ const Footer = () => {
                 <FaYoutube className="w-6 h-6" />
               </a>
             </div>
-            
           </div>
         </div>
         <div className="text-center mt-8 text-gray-600">
-          <p>© 2024, Al-Fatah All Rights Reserved - Powered By Tech Andaz</p>
+          <p>© 2024, Store2u All Rights Reserved - Powered By Tech Andaz</p>
         </div>
       </div>
     </footer>

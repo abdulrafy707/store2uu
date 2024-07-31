@@ -1,20 +1,20 @@
-'use client';
-import { useEffect, useState } from 'react';
-import AdminOrdersPage from './AdminOrdersPage';
+'use client'
+import { useState, useEffect } from 'react';
+import FilterableTable from './FilterableTable';
 
 const OrdersPage = () => {
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
       const response = await fetch('/api/orders');
-      const result = await response.json();
-      setData(result);
-      setIsLoading(false);
+      const data = await response.json();
+      setOrders(data);
+      setLoading(false);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      setIsLoading(false);
+      console.error('Error fetching orders:', error);
+      setLoading(false);
     }
   };
 
@@ -22,13 +22,13 @@ const OrdersPage = () => {
     fetchData();
   }, []);
 
+  if (loading) {
+    return <div className="text-center py-8">Loading...</div>;
+  }
+
   return (
-    <div className="container mx-auto p-4">
-      {isLoading ? (
-        <div className="text-center text-2xl">Loading...</div>
-      ) : (
-        <AdminOrdersPage data={data} fetchData={fetchData} />
-      )}
+    <div className="bg-white min-h-screen">
+      <FilterableTable data={orders} fetchData={fetchData} />
     </div>
   );
 };

@@ -14,20 +14,18 @@ const Products = () => {
   const productRefs = useRef([]);
   const router = useRouter();
 
+  // Fetch categories, subcategories, and products on component mount
   useEffect(() => {
     const fetchCategoriesAndSubcategories = async () => {
       try {
-        // Fetch categories
         const categoryResponse = await axios.get('/api/categories');
         const categoriesData = categoryResponse.data;
         setCategories(categoriesData);
 
-        // Fetch subcategories
         const subcategoryResponse = await axios.get('/api/subcategories');
         const subcategoriesData = subcategoryResponse.data;
         setSubcategories(subcategoriesData);
 
-        // Fetch products
         const productsResponse = await axios.get('/api/products');
         const productsData = productsResponse.data;
         setProducts(productsData);

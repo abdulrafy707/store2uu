@@ -74,7 +74,7 @@ const ProductsPage = () => {
         <div className="text-center text-2xl">Loading...</div>
       ) : (
         <>
-          <div className="flex space-x-4 overflow-x-auto">
+          {/* <div className="flex space-x-4 overflow-x-auto">
             {categories.map((category) => (
               <button
                 key={category.id}
@@ -84,7 +84,7 @@ const ProductsPage = () => {
                 {category.name}
               </button>
             ))}
-          </div>
+          </div> */}
           <FilterableTable
             products={products}
             fetchProducts={() => fetchData(selectedCategory)}
