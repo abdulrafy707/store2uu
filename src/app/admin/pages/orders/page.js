@@ -1,4 +1,3 @@
-// pages/admin/orders/index.js
 'use client';
 import { useEffect, useState } from 'react';
 import AdminOrdersPage from './AdminOrdersPage';

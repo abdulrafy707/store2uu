@@ -1,20 +1,25 @@
-// components/FilterableTable.js
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 
-const FilterableTable = ({ products, fetchProducts, categories, subcategories }) => {
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+import 'react-quill/dist/quill.snow.css';
+
+const FilterableTable = ({ products = [], fetchProducts, categories = [], subcategories = [] }) => {
   const [filter, setFilter] = useState('');
-  const [filteredData, setFilteredData] = useState(products || []);
+  const [filteredData, setFilteredData] = useState(products);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const fileInputRef = useRef(null);
   const router = useRouter();
 
   useEffect(() => {
     setFilteredData(
-      (products || []).filter((item) =>
+      products.filter((item) =>
         Object.values(item).some((val) =>
           String(val).toLowerCase().includes(filter.toLowerCase())
         )
@@ -23,14 +28,42 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
   }, [filter, products]);
 
   useEffect(() => {
-    if (newProduct.categoryId && Array.isArray(subcategories)) {
+    if (subcategories.length) {
       setFilteredSubcategories(
-        subcategories.filter(subcat => subcat.categoryId === parseInt(newProduct.categoryId))
+        subcategories.filter(subcat => subcat.categoryId === parseInt(selectedCategory))
       );
     } else {
       setFilteredSubcategories([]);
     }
-  }, [newProduct.categoryId, subcategories]);
+  }, [selectedCategory, subcategories]);
+
+  const handleDeleteItem = async (id) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/products/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        fetchProducts(); // Refresh the data after deleting
+      } else {
+        console.error('Failed to delete product');
+      }
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    }
+    setIsLoading(false);
+  };
+
+  const navigateToAddProductPage = (productId) => {
+    router.push(`/admin/pages/add-product?id=${productId}`);
+  };
+
+  const handleEditItem = (item) => {
+    navigateToAddProductPage(item.id);
+  };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -51,7 +84,7 @@ const FilterableTable = ({ products, fetchProducts, categories, subcategories })
             </button>
             <button
               className="text-gray-600 hover:text-gray-900 focus:outline-none"
-              onClick={() => router.push('/add-product')}
+              onClick={() => router.push('/admin/pages/add-product')}
             >
               <PlusIcon className="h-6 w-6" />
             </button>

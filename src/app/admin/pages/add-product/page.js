@@ -1,15 +1,13 @@
-// pages/add-product.js
 'use client';
-
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Select from 'react-select';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
-
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 import 'react-quill/dist/quill.snow.css';
 
-const AddProductPage = ({ categories, subcategories }) => {
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+
+const AddProductPage = () => {
   const [newProduct, setNewProduct] = useState({
     id: null,
     name: '',
@@ -20,25 +18,65 @@ const AddProductPage = ({ categories, subcategories }) => {
     subcategoryId: '',
     colors: [],
     sizes: [],
-    image: null, // Image file
-    imageUrl: '', // Image URL
+    image: null,
+    imageUrl: '',
   });
 
-  const [images, setImages] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
+  const [images, setImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const productId = searchParams.get('id');
 
   useEffect(() => {
-    if (newProduct.categoryId && Array.isArray(subcategories)) {
-      setFilteredSubcategories(
-        subcategories.filter(subcat => subcat.categoryId === parseInt(newProduct.categoryId))
-      );
-    } else {
-      setFilteredSubcategories([]);
+    fetchCategories();
+    if (productId) {
+      fetchProductData(productId);
     }
-  }, [newProduct.categoryId, subcategories]);
+  }, [productId]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/categories');
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchSubcategories = async (categoryId) => {
+    try {
+      const response = await fetch(`/api/subcategories?categoryId=${categoryId}`);
+      const data = await response.json();
+      setFilteredSubcategories(data);
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+    }
+  };
+
+  const fetchProductData = async (id) => {
+    try {
+      const response = await fetch(`/api/products/${id}`);
+      const data = await response.json();
+      setNewProduct({
+        ...data,
+        colors: data.colors.map((color) => ({ value: color, label: color })),
+        sizes: data.sizes.map((size) => ({ value: size, label: size })),
+      });
+      setExistingImages(data.images || []);
+      if (data.categoryId) {
+        fetchSubcategories(data.categoryId);
+      }
+    } catch (error) {
+      console.error('Error fetching product data:', error);
+    }
+  };
 
   const handleAddNewItem = async () => {
     if (!newProduct.name || !newProduct.richDescription || !newProduct.price || !newProduct.stock || !newProduct.subcategoryId) {
@@ -65,15 +103,9 @@ const AddProductPage = ({ categories, subcategories }) => {
         }
       }));
 
-      let plainText = '';
-      if (typeof window !== 'undefined') {
-        const quill = document.querySelector('.ql-editor'); // Get the Quill editor element
-        plainText = quill ? quill.innerText : ''; // Extract plain text from the Quill editor
-      }
-
       const productToSubmit = {
         ...newProduct,
-        description: plainText,  // Use plain text as description
+        description: newProduct.richDescription, // Directly save the rich text HTML content
         price: parseFloat(newProduct.price),
         stock: parseInt(newProduct.stock),
         subcategoryId: parseInt(newProduct.subcategoryId),
@@ -99,7 +131,7 @@ const AddProductPage = ({ categories, subcategories }) => {
           });
 
       if (response.ok) {
-        router.push('/admin/pages/products'); // Navigate back to the products list page after adding/updating
+        router.push('/admin/pages/products');
       } else {
         const errorData = await response.json();
         console.error('Failed to create/update product:', errorData.message);
@@ -110,16 +142,60 @@ const AddProductPage = ({ categories, subcategories }) => {
     setIsLoading(false);
   };
 
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    setImages((prevImages) => [...prevImages, ...files]);
-  };
-
-  const handleRemoveImage = (index) => {
-    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const updateProduct = async () => {
+    if (!newProduct.name || !newProduct.richDescription || !newProduct.price || !newProduct.stock || !newProduct.subcategoryId) {
+      alert("All fields are required");
+      return;
     }
+    setIsLoading(true);
+
+    try {
+      const uploadedImages = await Promise.all(images.map(async (img) => {
+        const imageBase64 = await convertToBase64(img);
+        const response = await fetch('https://appstore.store2u.ca/uploadImage.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ image: imageBase64 }),
+        });
+        const result = await response.json();
+        if (response.ok) {
+          return result.image_url;
+        } else {
+          throw new Error(result.error || 'Failed to upload image');
+        }
+      }));
+
+      const productToSubmit = {
+        ...newProduct,
+        description: newProduct.richDescription, // Directly save the rich text HTML content
+        price: parseFloat(newProduct.price),
+        stock: parseInt(newProduct.stock),
+        subcategoryId: parseInt(newProduct.subcategoryId),
+        colors: JSON.stringify(newProduct.colors.map(color => color.value)),
+        sizes: JSON.stringify(newProduct.sizes.map(size => size.value)),
+        images: uploadedImages,
+      };
+
+      const response = await fetch(`/api/products/${newProduct.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productToSubmit),
+      });
+
+      if (response.ok) {
+        router.push('/admin/pages/products');
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to update product:', errorData.message);
+      }
+    } catch (error) {
+      console.error('Error updating item:', error);
+    }
+    setIsLoading(false);
   };
 
   const convertToBase64 = (file) => {
@@ -131,18 +207,32 @@ const AddProductPage = ({ categories, subcategories }) => {
     });
   };
 
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImages((prevImages) => [...prevImages, ...files]);
+  };
+
+  const handleRemoveExistingImage = (index) => {
+    setExistingImages((prevImages) => prevImages.filter((_, i) => i !== index));
+  };
+
+  const handleRemoveImage = (index) => {
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const colorOptions = [
     { value: 'Red', label: 'Red' },
     { value: 'Blue', label: 'Blue' },
     { value: 'Green', label: 'Green' },
-    // Add more colors as needed
   ];
 
   const sizeOptions = [
     { value: 'S', label: 'S' },
     { value: 'M', label: 'M' },
     { value: 'L', label: 'L' },
-    // Add more sizes as needed
   ];
 
   return (
@@ -153,149 +243,183 @@ const AddProductPage = ({ categories, subcategories }) => {
         </div>
       )}
       <div className="bg-white shadow rounded-lg p-4 relative">
-        <Tabs>
-          <TabList>
-            <Tab>Details</Tab>
-            <Tab>Images</Tab>
-            <Tab>Rich Text</Tab>
-          </TabList>
-          <div className='h-[60vh] overflow-y-auto'>
-            <TabPanel>
-              <h2 className="text-xl mb-4">{newProduct.id ? 'Edit Product' : 'Add New Product'}</h2>
+        <h2 className="text-xl mb-4">{newProduct.id ? 'Edit Product' : 'Add New Product'}</h2>
+
+        {/* Section 1: Product Details */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2">Product Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Category</label>
+              <select
+                value={newProduct.categoryId}
+                onChange={(e) => {
+                  const categoryId = e.target.value;
+                  setNewProduct({ ...newProduct, categoryId, subcategoryId: '' });
+                  fetchSubcategories(categoryId);
+                }}
+                className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select Category</option>
+                {Array.isArray(categories) && categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {filteredSubcategories.length > 0 && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Category</label>
+                <label className="block text-sm font-medium text-gray-700">Subcategory</label>
                 <select
-                  value={newProduct.categoryId}
-                  onChange={(e) => {
-                    const categoryId = e.target.value;
-                    setNewProduct({ ...newProduct, categoryId, subcategoryId: '' });
-                    setFilteredSubcategories(
-                      Array.isArray(subcategories) ? subcategories.filter(subcat => subcat.categoryId === parseInt(categoryId)) : []
-                    );
-                  }}
+                  value={newProduct.subcategoryId}
+                  onChange={(e) => setNewProduct({ ...newProduct, subcategoryId: e.target.value })}
                   className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Select Category</option>
-                  {Array.isArray(categories) && categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
+                  <option value="">Select Subcategory</option>
+                  {filteredSubcategories.map((subcategory) => (
+                    <option key={subcategory.id} value={subcategory.id}>
+                      {subcategory.name}
                     </option>
                   ))}
                 </select>
               </div>
-              {filteredSubcategories.length > 0 && (
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700">Subcategory</label>
-                  <select
-                    value={newProduct.subcategoryId}
-                    onChange={(e) => setNewProduct({ ...newProduct, subcategoryId: e.target.value })}
-                    className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Subcategory</option>
-                    {filteredSubcategories.map((subcategory) => (
-                      <option key={subcategory.id} value={subcategory.id}>
-                        {subcategory.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  type="text"
-                  value={newProduct.name}
-                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                  className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Price</label>
-                <input
-                  type="number"
-                  value={newProduct.price}
-                  onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                  className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Stock</label>
-                <input
-                  type="number"
-                  value={newProduct.stock}
-                  onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-                  className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Colors</label>
-                <Select
-                  isMulti
-                  value={newProduct.colors}
-                  onChange={(selected) => setNewProduct({ ...newProduct, colors: selected })}
-                  options={colorOptions}
-                  className="mt-1"
-                  classNamePrefix="select"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Sizes</label>
-                <Select
-                  isMulti
-                  value={newProduct.sizes}
-                  onChange={(selected) => setNewProduct({ ...newProduct, sizes: selected })}
-                  options={sizeOptions}
-                  className="mt-1"
-                  classNamePrefix="select"
-                />
-              </div>
-            </TabPanel>
-            <TabPanel>
-              <h2 className="text-xl mb-4">Upload Images</h2>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Images</label>
-                <input
-                  type="file"
-                  onChange={handleImageChange}
-                  className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  multiple
-                />
-              </div>
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold mb-2">New Images</h3>
-                {images.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {images.map((img, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={URL.createObjectURL(img)}
-                          alt={`Product Image ${index}`}
-                          className="w-full h-32 object-cover"
-                        />
-                        <button
-                          onClick={() => handleRemoveImage(index)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
-                        >
-                          X
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </TabPanel>
-            <TabPanel>
-              <h2 className="text-xl mb-4">Rich Text Description</h2>
-              <div className="mb-4">
-                <ReactQuill
-                  value={newProduct.richDescription}
-                  onChange={(value) => setNewProduct({ ...newProduct, richDescription: value })}
-                  className="h-64"
-                />
-              </div>
-            </TabPanel>
+            )}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Name</label>
+              <input
+                type="text"
+                value={newProduct.name}
+                onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Price</label>
+              <input
+                type="number"
+                value={newProduct.price}
+                onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Stock</label>
+              <input
+                type="number"
+                value={newProduct.stock}
+                onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
+                className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Colors</label>
+              <Select
+                isMulti
+                value={newProduct.colors}
+                onChange={(selected) => setNewProduct({ ...newProduct, colors: selected })}
+                options={colorOptions}
+                className="mt-1"
+                classNamePrefix="select"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Sizes</label>
+              <Select
+                isMulti
+                value={newProduct.sizes}
+                onChange={(selected) => setNewProduct({ ...newProduct, sizes: selected })}
+                options={sizeOptions}
+                className="mt-1"
+                classNamePrefix="select"
+              />
+            </div>
           </div>
-        </Tabs>
+        </div>
+
+        {/* Section 2: Rich Text Description */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2">Description</h3>
+          <ReactQuill
+            value={newProduct.richDescription}
+            onChange={(value) => setNewProduct({ ...newProduct, richDescription: value })}
+            className="h-64"
+          />
+        </div>
+
+        {/* Section 3: Upload Images */}
+        <div className="mb-6 pt-8">
+          <h3 className="text-lg font-semibold mb-2">Upload Images</h3>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">Images</label>
+            <input
+              type="file"
+              onChange={handleImageChange}
+              className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+              multiple
+              ref={fileInputRef}
+            />
+          </div>
+          <div className="mb-4">
+            <h4 className="text-md font-medium mb-2">Existing Images</h4>
+            {existingImages.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {existingImages.map((img, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={`https://appstore.store2u.ca/uploads/${img}`}
+                      alt={`Product Image ${index}`}
+                      className="w-full h-32 object-cover"
+                    />
+                    <button
+                      onClick={() => handleRemoveExistingImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                    >
+                      X
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="mb-4">
+            <h4 className="text-md font-medium mb-2">New Images</h4>
+            {images.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {images.map((img, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={URL.createObjectURL(img)}
+                      alt={`Product Image ${index}`}
+                      className="w-full h-32 object-cover"
+                    />
+                    <button
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                    >
+                      X
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-end space-x-2 mt-4">
+          <button
+            onClick={() => router.push('/admin/pages/products')}
+            className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={newProduct.id ? updateProduct : handleAddNewItem}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            {newProduct.id ? 'Update' : 'Add'}
+          </button>
+        </div>
       </div>
     </div>
   );

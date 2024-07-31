@@ -113,13 +113,13 @@ const ProductPage = () => {
   }
 
   return (
-    <div className="container w-full bg-white  px-0">
+    <div className="container  mx-auto px-4">
       <div className="flex justify-between mb-6">
         <h2 className="text-2xl font-semibold">Product Page</h2>
       </div>
-      <div className="flex">
-        <div className="w-1/2">
-          <div className="relative mb-8">
+      <div className="flex flex-wrap">
+        <div className="w-full lg:w-1/2 mb-8 lg:mb-0">
+          <div className="relative">
             {product.images && product.images.length > 0 ? (
               <>
                 <motion.img
@@ -148,8 +148,8 @@ const ProductPage = () => {
             )}
           </div>
         </div>
-        <div className="w-1/2 pl-20 pr-0">
-          <h2 className="text-xl  mb-4">{product.name}</h2>
+        <div className="w-full lg:w-1/2 lg:pl-20">
+          <h2 className="text-xl mb-4">{product.name}</h2>
           <div className="flex items-center mb-4">
             {product.originalPrice && (
               <span className="text-red-500 font-bold line-through mr-4">Rs.{product.originalPrice}</span>
@@ -162,25 +162,25 @@ const ProductPage = () => {
       </div>
 
       <div className="mt-12">
-        <h3 className="text-2xl font-semibold pl-6 ml-6 mb-6">Related Products</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-5 px-10 gap-4">
+        <h3 className="text-2xl font-semibold mb-6">Related Products</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {relatedProducts.map((relatedProduct) => (
             <div
               key={relatedProduct.id}
-              className="bg-white shadow-md rounded-lg relative cursor-pointer px-5 w-64 h-80 m-0"
+              className="bg-white shadow-md rounded-lg relative cursor-pointer p-4"
               onClick={() => handleRelatedProductClick(relatedProduct.id)}
             >
               {relatedProduct.images && relatedProduct.images.length > 0 ? (
                 <motion.img
                   src={getImageUrl(relatedProduct.images[0].url)}
                   alt={relatedProduct.name}
-                  className="h-32 w-full object-cover mb-4 rounded"
+                  className="h-40 w-full object-cover mb-4 rounded"
                   whileHover={{ scale: 1.1 }}
                   transition={{ duration: 0.3 }}
                   onError={(e) => { e.target.onerror = null; e.target.src = '/default-image.png'; }} // Fallback image
                 />
               ) : (
-                <div className="h-32 w-full bg-gray-200 mb-4 rounded flex items-center justify-center text-gray-500">
+                <div className="h-40 w-full bg-gray-200 mb-4 rounded flex items-center justify-center text-gray-500">
                   No Image
                 </div>
               )}
@@ -210,7 +210,7 @@ const ProductPage = () => {
 
       {cartVisible && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-end z-50">
-          <div className="bg-white w-1/3 h-full p-4 overflow-y-auto">
+          <div className="bg-white w-full lg:w-1/3 h-full p-4 overflow-y-auto">
             <div className="flex justify-between mb-6">
               <h2 className="text-xl font-semibold">Your Cart</h2>
               <button onClick={() => setCartVisible(false)}>
