@@ -1,6 +1,7 @@
-'use client'
+// pages/admin/orders/index.js
+'use client';
 import { useEffect, useState } from 'react';
-import FilterableTable from './FilterableTable'; // Ensure the correct import path
+import AdminOrdersPage from './AdminOrdersPage';
 
 const OrdersPage = () => {
   const [data, setData] = useState([]);
@@ -27,7 +28,7 @@ const OrdersPage = () => {
       {isLoading ? (
         <div className="text-center text-2xl">Loading...</div>
       ) : (
-        <FilterableTable data={data} fetchData={fetchData} />
+        <AdminOrdersPage data={data} fetchData={fetchData} />
       )}
     </div>
   );

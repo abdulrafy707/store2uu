@@ -1,4 +1,3 @@
-// /api/orders.js
 import { NextResponse } from 'next/server';
 import prisma from '../../util/prisma';
 import jwt from 'jsonwebtoken';
@@ -11,10 +10,10 @@ export async function POST(request) {
     }
 
     const decoded = jwt.verify(authToken, process.env.JWT_KEY);
-    const { billingAddress, shippingAddress, paymentMethod, paymentInfo, items, total } = await request.json();
+    const { shippingAddress, paymentMethod, paymentInfo, items, total } = await request.json();
 
     console.log("Decoded user:", decoded);
-    console.log("Incoming order data:", { billingAddress, shippingAddress, paymentMethod, paymentInfo, items, total });
+    console.log("Incoming order data:", { shippingAddress, paymentMethod, paymentInfo, items, total });
 
     // Ensure the necessary data is available
     if (!decoded.id || !items || items.length === 0 || !total) {
@@ -25,10 +24,17 @@ export async function POST(request) {
     const newOrder = await prisma.order.create({
       data: {
         userId: decoded.id,
-        total,  // Make sure to include the total here
+        total,
         status: 'PENDING',
-        billingAddress: JSON.stringify(billingAddress),
-        shippingAddress: JSON.stringify(shippingAddress),
+        recipientName: shippingAddress.recipientName,
+        streetAddress: shippingAddress.streetAddress,
+        apartmentSuite: shippingAddress.apartmentSuite,
+        city: shippingAddress.city,
+        state: shippingAddress.state,
+        zip: shippingAddress.zip,
+        country: shippingAddress.country,
+        phoneNumber: shippingAddress.phoneNumber,
+        email: shippingAddress.email,
         paymentMethod,
         paymentInfo: paymentMethod === 'Credit Card' ? JSON.stringify(paymentInfo) : null,
         orderItems: {
@@ -52,11 +58,7 @@ export async function POST(request) {
   }
 }
 
-
-
-
-
-export async function GET(req) {
+export async function GET() {
   try {
     const orders = await prisma.order.findMany({
       include: {
@@ -70,9 +72,9 @@ export async function GET(req) {
   }
 }
 
-export async function PUT(req) {
+export async function PUT(request) {
   try {
-    const { id, userId, total, status, orderItems } = req.body;
+    const { id, userId, total, status, orderItems, shippingAddress, paymentMethod, paymentInfo } = await request.json();
 
     const updatedOrder = await prisma.order.update({
       where: {
@@ -82,6 +84,17 @@ export async function PUT(req) {
         userId: parseInt(userId),
         total: parseFloat(total),
         status,
+        recipientName: shippingAddress.recipientName,
+        streetAddress: shippingAddress.streetAddress,
+        apartmentSuite: shippingAddress.apartmentSuite,
+        city: shippingAddress.city,
+        state: shippingAddress.state,
+        zip: shippingAddress.zip,
+        country: shippingAddress.country,
+        phoneNumber: shippingAddress.phoneNumber,
+        email: shippingAddress.email,
+        paymentMethod,
+        paymentInfo: paymentMethod === 'Credit Card' ? JSON.stringify(paymentInfo) : null,
         updatedAt: new Date(),
         orderItems: {
           deleteMany: {}, // Remove all current order items
@@ -101,9 +114,9 @@ export async function PUT(req) {
   }
 }
 
-export async function DELETE(req) {
+export async function DELETE(request) {
   try {
-    const { id } = req.query;
+    const { id } = await request.json();
     const deletedOrder = await prisma.order.delete({
       where: {
         id: parseInt(id),
