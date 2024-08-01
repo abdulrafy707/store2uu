@@ -1,75 +1,119 @@
-'use client';
+// components/Footer.js
 
-import React from 'react';
-import { FaFacebookF, FaInstagram, FaYoutube, FaGooglePlay, FaApple } from 'react-icons/fa';
+import React from "react";
+import { RxGlobe } from "react-icons/rx";
+import { MdKeyboardArrowDown, MdCopyright } from "react-icons/md";
+import { FaFacebook, FaTwitter, FaPinterest, FaInstagram } from "react-icons/fa";
+import Link from 'next/link';
 
 const Footer = () => {
   return (
-    <footer className="py-12 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-wrap justify-between items-center mb-12">
-          <div className="w-full md:w-1/3 mb-8 md:mb-0">
-            <img src="/logo.jpg" alt="Logo" width={150} height={75} />
-            <p className="mt-4 text-gray-600">Since 1941</p>
-          </div>
+    <>
+      <div className="grid grid-cols-1 px-4 gap-2 md:px-10 lg:px-20 sm:grid-cols-3 md:grid-cols-10 py-16 border-t-2 border-b-2 text-black lg:grid-cols-10">
+        <div className="flex flex-col gap-2 col-span-4">
+          <Link href="/" legacyBehavior>
+            <a className="focus:outline-none">
+              <img src="/store2u.webp" className="cursor-pointer w-[100px] " alt="Store2u Logo" />
+            </a>
+          </Link>
+          <p className="text-[15px] font-[400] md:mr-10 sm:mr-10 lg:mr-10 xl:mr-10 text-justify">
+            Store2u is your ultimate destination for top-quality products, seamless shopping experience, and unmatched customer service. Discover a wide range of items to meet all your needs.
+          </p>
         </div>
-        <div className="flex flex-wrap justify-between">
-          <div className="w-full md:w-1/3 mb-8 md:mb-0">
-            <h2 className="text-lg font-semibold mb-4">Customer Service</h2>
-            <ul>
-              <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">My Account</li>
-              <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">FAQs</li>
-              <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">Cash On Delivery Service</li>
-              <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">Contact Us</li>
-              <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">Store Locator</li>
-              <h2 className="text-lg font-semibold mb-2">DOWNLOAD THE APP</h2>
-              <div className="flex justify-center space-x-4">
-                <a href="https://play.google.com/store" className="transform hover:scale-105 transition duration-300">
-                  <FaGooglePlay className="w-8 h-8 text-gray-600" />
-                </a>
-                <a href="https://www.apple.com/app-store" className="transform hover:scale-105 transition duration-300">
-                  <FaApple className="w-8 h-8 text-gray-600" />
-                </a>
-              </div>
-            </ul>
-          </div>
-          <div className="w-full md:w-1/3 mb-8 md:mb-0">
-            <h2 className="text-lg font-semibold mb-4">Help & Information</h2>
-            <ul>
-              <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">About Us</li>
-              <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">Shipping & Exchange Policy</li>
-              <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">Terms & Conditions</li>
-              <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">Privacy Policy</li>
-              <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">Payment Information</li>
-              <li className="mb-2 hover:text-gray-700 transition duration-300 cursor-pointer">Credit/Debit Card Policy</li>
-            </ul>
-          </div>
-          <div className="w-full md:w-1/3">
-            <h2 className="text-lg font-semibold mb-4">Contact Information</h2>
-            <p className="mb-2 text-gray-600">Store2u Head Office, 52B, Block E1, Adjacent Shapes Gym, Gulberg 3, Lahore, Pakistan</p>
-            <p className="mb-2 text-gray-600">For Queries and Complaints:</p>
-            <p className="mb-2 text-gray-600">042-32307777 (9:00 AM TO 9:00 PM)</p>
-            <p className="mb-2 text-gray-600">Whatsapp message only: 0311-1555222 (9:00 AM TO 9:00 PM)</p>
-            <p className="mb-2 text-gray-600">Email: info@store2u.pk</p>
-            <h2 className="text-lg font-semibold mb-2">FOLLOW US ON</h2>
-            <div className="flex justify-left md:justify-end space-x-4">
-              <a href="https://www.facebook.com" className="text-gray-600 hover:text-blue-500 transform hover:scale-125 transition duration-300">
-                <FaFacebookF className="w-6 h-6" />
-              </a>
-              <a href="https://www.instagram.com" className="text-gray-600 hover:text-pink-500 transform hover:scale-125 transition duration-300">
-                <FaInstagram className="w-6 h-6" />
-              </a>
-              <a href="https://www.youtube.com" className="text-gray-600 hover:text-red-500 transform hover:scale-125 transition duration-300">
-                <FaYoutube className="w-6 h-6" />
-              </a>
-            </div>
-          </div>
+        <div className="flex flex-col gap-2 col-span-2">
+          <p className="text-[20px] font-[600]">Company</p>
+          <Link href="/about" legacyBehavior>
+            <a className="hover:no-underline">
+              <p className="text-[15px] font-[400]">About Us</p>
+            </a>
+          </Link>
+          <Link href="/privacy-policy" legacyBehavior>
+            <a className="hover:no-underline">
+              <p className="text-[15px] font-[400]">Privacy Policy</p>
+            </a>
+          </Link>
+          <Link href="/terms-conditions" legacyBehavior>
+            <a className="hover:no-underline">
+              <p className="text-[15px] font-[400]">Terms & Conditions</p>
+            </a>
+          </Link>
+          <Link href="/contact" legacyBehavior>
+            <a className="hover:no-underline">
+              <p className="text-[15px] font-[400]">Contact Us</p>
+            </a>
+          </Link>
+          <Link href="/affiliate-program" legacyBehavior>
+            <a className="hover:no-underline">
+              <p className="text-[15px] font-[400]">Affiliate Program</p>
+            </a>
+          </Link>
         </div>
-        <div className="text-center mt-8 text-gray-600">
-          <p>© 2024, Store2u All Rights Reserved - Powered By Tech Andaz</p>
+        <div className="flex flex-col gap-2 col-span-2">
+          <p className="text-[20px] font-[600]">Explore</p>
+          <Link href="/promotions" legacyBehavior>
+            <a className="hover:no-underline">
+              <p className="text-[15px] font-[400]">Promotions</p>
+            </a>
+          </Link>
+          <Link href="/new-arrivals" legacyBehavior>
+            <a className="hover:no-underline">
+              <p className="text-[15px] font-[400]">New Arrivals</p>
+            </a>
+          </Link>
+          <Link href="/best-sellers" legacyBehavior>
+            <a className="hover:no-underline">
+              <p className="text-[15px] font-[400]">Best Sellers</p>
+            </a>
+          </Link>
+          <Link href="/categories" legacyBehavior>
+            <a className="hover:no-underline">
+              <p className="text-[15px] font-[400]">Categories</p>
+            </a>
+          </Link>
+          <Link href="/customer-reviews" legacyBehavior>
+            <a className="hover:no-underline">
+              <p className="text-[15px] font-[400]">Customer Reviews</p>
+            </a>
+          </Link>
+        </div>
+        <div className="flex flex-col gap-2 col-span-2">
+          <p className="text-[20px] font-[600]">Support</p>
+          <Link href="/help-center" legacyBehavior>
+            <a className="hover:no-underline">
+              <p className="text-[15px] font-[400]">Help Center</p>
+            </a>
+          </Link>
+          <Link href="/pricing" legacyBehavior>
+            <a className="hover:no-underline">
+              <p className="text-[15px] font-[400]">Pricing</p>
+            </a>
+          </Link>
+          <p className="text-[15px] font-[400]">Email: support@store2u.com</p>
+          <p className="text-[15px] font-[400]">Phone: +1234 567 890</p>
         </div>
       </div>
-    </footer>
+
+      <div className="flex justify-around items-center flex-wrap-reverse p-8 gap-6 text-black">
+        <div className="flex items-center gap-1 border-2 p-2">
+          <RxGlobe className="text-[25px]" />
+          <p>English (United States)</p>
+          <MdKeyboardArrowDown className="text-[25px]" />
+        </div>
+        <div className="text-center">
+          <div className="flex items-center gap-1">
+            <MdCopyright />
+            <p>2024 All Rights Reserved</p>
+          </div>
+          <p>Privacy policy | Terms</p>
+        </div>
+        <div className="flex gap-[6px] w-[250px] justify-center">
+          <FaFacebook className="h-8 w-8" />
+          <FaTwitter className="h-8 w-8" />
+          <FaPinterest className="h-8 w-8" />
+          <FaInstagram className="h-8 w-8" />
+        </div>
+      </div>
+    </>
   );
 };
 

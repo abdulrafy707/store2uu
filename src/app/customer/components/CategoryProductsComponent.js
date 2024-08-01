@@ -19,6 +19,14 @@ const SubcategoryProductsComponent = () => {
         const subcategoriesResponse = await axios.get('/api/subcategories');
         const subcategoriesData = subcategoriesResponse.data;
         setSubcategories(subcategoriesData);
+
+        // Log all subcategories and their related products
+        subcategoriesData.forEach(subcategory => {
+          console.log(`Subcategory ${subcategory.id}: ${subcategory.name}`);
+          subcategory.products.forEach(product => {
+            console.log(`  Product ${product.id}: ${product.name}`);
+          });
+        });
       } catch (error) {
         console.error('Error fetching subcategories:', error);
       }
@@ -26,24 +34,13 @@ const SubcategoryProductsComponent = () => {
     fetchSubcategories();
   }, []);
 
-  const fetchProducts = async (subcategoryId) => {
-    try {
-      const productsResponse = await axios.get(`/api/products?subcategoryId=${subcategoryId}`);
-      const productsData = productsResponse.data;
-      setProducts(productsData);
-      setFilteredProducts(productsData.slice(0, productsPerPage));
-      setCurrentPage(1);
-
-      // Log products in the terminal
-      console.log(`Products for subcategory ${subcategoryId}:`, productsData.map(product => product.id));
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
-
-  const handleSubcategoryClick = async (subcategoryId) => {
+  const handleSubcategoryClick = (subcategoryId) => {
     setSelectedSubcategory(subcategoryId);
-    await fetchProducts(subcategoryId);
+    setCurrentPage(1);
+    const subcategory = subcategories.find(subcat => subcat.id === subcategoryId);
+    setProducts(subcategory.products);
+    console.log(subcategory.products);
+    setFilteredProducts(subcategory.products.slice(0, productsPerPage));
   };
 
   const handleNextPage = () => {
