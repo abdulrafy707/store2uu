@@ -1,10 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import {jwt_decode} from 'jsonwebtoken';
-
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -12,30 +10,6 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-
-  useEffect(() => {
-    // Check if the user is already logged in
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded = jwt_decode(token);
-        if (decoded && decoded.exp > Date.now() / 1000) {
-          const { role } = decoded;
-          if (role === 'ADMIN') {
-            router.push('/admin/pages/Products');
-          } else if (role === 'CUSTOMER') {
-            alert('This ID exists for a customer');
-            localStorage.removeItem('token'); // Delete JWT token from localStorage
-            router.push('/customer/pages/login');
-          } else {
-            setError('Unknown role. Please contact support.');
-          }
-        }
-      } catch (error) {
-        console.error('Error decoding token:', error);
-      }
-    }
-  }, [router]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -48,11 +22,13 @@ const LoginPage = () => {
         const { role } = response.data.user;
 
         if (role === 'ADMIN') {
+          alert('Login Successfully');
+          console.log('Redirecting to admin page...');
           router.push('/admin/pages/Products');
         } else if (role === 'CUSTOMER') {
-            alert('This ID exists for a customer');
-            localStorage.removeItem('token'); // Delete JWT token from localStorage
-            router.push('/customer/pages/login');
+          alert('This ID exists for a customer');
+          localStorage.removeItem('token'); // Delete JWT token from localStorage
+          router.push('/customer/pages/login');
         } else {
           setError('Unknown role. Please contact support.');
         }
@@ -72,7 +48,6 @@ const LoginPage = () => {
   };
 
   return (
-    
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <form className="bg-white p-8 rounded shadow-md w-full max-w-md" onSubmit={handleLogin}>
         <h2 className="text-2xl font-bold mb-6">Admin Login</h2>
@@ -116,7 +91,6 @@ const LoginPage = () => {
         </div>
       </form>
     </div>
-    
   );
 };
 

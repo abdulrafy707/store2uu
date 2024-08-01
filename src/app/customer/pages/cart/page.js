@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FiPlus, FiMinus, FiTrash2 } from 'react-icons/fi';
 import axios from 'axios';
-import { jwt_decode } from 'jsonwebtoken';
+import {jwtDecode} from 'jwt-decode'; // Correct import
 
 const CartPage = () => {
   const [cart, setCart] = useState([]);
@@ -32,10 +32,11 @@ const CartPage = () => {
     const token = localStorage.getItem('token'); // Assuming the token is stored in localStorage
     if (token) {
       try {
-        const decoded = jwt_decode(token);
+        const decoded = jwtDecode(token);
         if (decoded && decoded.exp > Date.now() / 1000) {
           router.push(`/customer/pages/checkout?total=${total}`);
         } else {
+          localStorage.removeItem('token'); // Remove invalid token
           router.push('/customer/pages/login');
         }
       } catch (error) {
@@ -142,7 +143,7 @@ const CartPage = () => {
           <div className="bg-white shadow-lg rounded-lg p-4 flex flex-col gap-2">
             <div className="flex justify-between">
               <p className="text-xl font-bold text-gray-700">Subtotal:</p>
-              <p className="text- text-gray-700">Rs.{total - tax - deliveryCharge}</p>
+              <p className="text-md text-gray-700">Rs.{total - tax - deliveryCharge}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-md font-medium text-gray-700">Tax (10%):</p>

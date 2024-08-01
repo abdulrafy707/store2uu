@@ -4,12 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { FiSearch, FiShoppingCart, FiMenu, FiX } from 'react-icons/fi';
 import { MdExpandMore } from 'react-icons/md';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const Header = () => {
   const [categories, setCategories] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -36,6 +39,15 @@ const Header = () => {
     fetchCartCount();
   }, []);
 
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    if (query.trim() !== '') {
+      router.push(`/customer/pages/allproducts?search=${query.trim()}`);
+    }
+  };
+  
+
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -48,7 +60,7 @@ const Header = () => {
   const hiddenCategories = categories.slice(5);
 
   return (
-    <header className="bg-white py-4 relative">
+    <header className="bg-white py-4 sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between">
         <div className="flex items-center">
           <img src="/logo.jpg" alt="Logo" className="h-10 w-[200px] mr-6" />
@@ -112,12 +124,16 @@ const Header = () => {
         </nav>
         <div className="flex items-center space-x-4 mt-4 lg:mt-0">
           <div className="relative flex items-center">
-            <input
-              type="text"
-              placeholder="What you looking for"
-              className="border rounded-full py-1 pl-4 pr-10 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <FiSearch className="absolute right-3 text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-300" />
+            <form className="w-full">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                placeholder="What you looking for"
+                className="border rounded-full py-1 pl-4 pr-10 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {/* <FiSearch className="absolute right-3 text-gray-500 cursor-pointer hover:text-blue-500 transition-colors duration-300" /> */}
+            </form>
           </div>
           <div>
             <Link href="/customer/pages/cart">

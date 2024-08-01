@@ -1,5 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
 import { FaUsers, FaSignOutAlt, FaChevronDown, FaCube, FaShoppingCart, FaTags } from 'react-icons/fa';
 
 const Sidebar = ({ setActiveComponent }) => {
@@ -20,15 +22,28 @@ const Sidebar = ({ setActiveComponent }) => {
     }));
   };
 
+  useEffect(() => {
+    const token = Cookies.get('token');
+    if (!token) {
+      alert('Login to see the dashboard!');
+      router.push('/admin');
+    } else {
+      const decodedToken = jwtDecode(token);
+    }
+  }, []);
+
+  
+
   const handleLogout = () => {
-    localStorage.removeItem('jwtToken');
-    window.location.href = '/';
+    Cookies.remove('token');
+    window.location.href = '/admin';
   };
+
 
   return (
     <div className="bg-gray-700 text-white w-64 min-h-screen flex flex-col">
       <div className="p-4 text-center">
-        <img width={50} height={50} src="/ali.png" alt="Profile" className="rounded-full mx-auto mb-2" />
+        <img width={50} height={50} src="/store2u.webp" alt="Profile" className="rounded-full mx-auto mb-2" />
         <h2 className="text-lg font-semibold">Store2u</h2>
         <p className="text-green-400">● Online</p>
       </div>
@@ -70,7 +85,14 @@ const Sidebar = ({ setActiveComponent }) => {
                 <li>
                   <a href='/admin/pages/Products'>
                     <button className="flex items-center p-2 hover:bg-blue-700 rounded">
-                      <span className="ml-2"> Products</span>
+                      <span className="ml-2">All Products</span>
+                    </button>
+                  </a>
+                </li>
+                <li>
+                  <a href='/admin/pages/add-product'>
+                    <button className="flex items-center p-2 hover:bg-blue-700 rounded">
+                      <span className="ml-2">Add Products</span>
                     </button>
                   </a>
                 </li>

@@ -1,72 +1,48 @@
-import { NextResponse } from "next/server";
-import prisma from '../../util/prisma';
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+// src/app/api/login/route.js
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { NextResponse } from 'next/server';
+
+const prisma = new PrismaClient();
+const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 export async function POST(request) {
-  const { email, password } = await request.json();
+  const data = await request.json();
+  const { email, password } = data;
+  console.log("email: ", email, "password: ", password);
 
   try {
     const user = await prisma.user.findUnique({
-      where: {
-        email: email,
-      },
+      where: { email },
     });
 
     if (!user) {
-      return NextResponse.json(
-        {
-          message: "User not found!",
-          success: false,
-        },
-        { status: 404 }
-      );
+      return NextResponse.json({
+        message: "User does not exist"
+      }, { status: 404 });
     }
 
-    const isPasswordValid = bcrypt.compareSync(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return NextResponse.json(
-        {
-          message: "Password not matched!",
-          success: false,
-        },
-        { status: 401 }
-      );
+      return NextResponse.json({
+        message: "Invalid Password"
+      }, { status: 401 });
     }
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-        name: user.name,
-      },
-      process.env.JWT_KEY,
-      { expiresIn: '1d' }
-    );
+    // Generate JWT token
+    const token = jwt.sign({ email: user.email, id: user.id, role: user.role }, SECRET_KEY, {
+      expiresIn: '1h' // token will expire in 1 hour
+    });
 
-    console.log("User logged in:", user.id); // Log user ID in the terminal
-
-    const response = NextResponse.json({
-      message: "Login successfully",
+    return NextResponse.json({
       success: true,
-      user, // Send the user data back to the client
+      message: "Login Successfully",
+      token,
+      user: { email: user.email, id: user.id, role: user.role } // Return the user details
     });
-
-    response.cookies.set("authToken", token, {
-      httpOnly: true,
-      maxAge: 60 * 60 * 24, // 1 day
-      path: "/"
-    });
-
-    return response;
   } catch (error) {
-    return NextResponse.json(
-      {
-        message: error.message,
-        success: false,
-      },
-      {
-        status: 500,
-      }
-    );
+    console.error('Error during login:', error);
+    return NextResponse.json({ message: 'Internal server error', error: error.message }, { status: 500 });
   }
 }

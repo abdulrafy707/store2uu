@@ -21,7 +21,7 @@ const CustomerLayout = ({ children }) => {
           <TopBar />
           <Header />
           <main className="flex-grow">
-            <BrowseCategories />
+            {/* <BrowseCategories /> */}
             {children}
           </main>
           <Footer />

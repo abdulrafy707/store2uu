@@ -8,6 +8,7 @@ export async function POST(request) {
     const { name, email, password, phoneno, city, role, base64 } = Object.fromEntries(data.entries());
     let imageUrl = '';
 
+    // Upload image to external API if base64 is provided
     if (base64) {
       const response = await fetch('https://appstore.store2u.ca/uploadImage.php', {
         method: 'POST',
@@ -18,7 +19,7 @@ export async function POST(request) {
       });
       const result = await response.json();
       if (response.ok) {
-        imageUrl = result.image_url;
+        imageUrl = result.image_url; // Ensure this key matches the response from your upload endpoint
       } else {
         throw new Error(result.error || 'Failed to upload image');
       }
@@ -28,13 +29,13 @@ export async function POST(request) {
 
     const newCustomer = await prisma.user.create({
       data: {
-        name: name,
-        email: email,
+        name,
+        email,
         password: hashedPassword,
-        phoneno: phoneno,
-        city: city,
-        role: role,
-        imageUrl: imageUrl,
+        phoneno,
+        city,
+        role,
+        imageUrl,
         createdAt: new Date(),
         updatedAt: new Date(),
       },

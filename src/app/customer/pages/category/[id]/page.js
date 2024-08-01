@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { motion } from 'framer-motion';
@@ -56,6 +56,9 @@ const CategoryPage = () => {
           setPriceRange({ min: 0, max: highestProductPrice });
 
           console.log(`These are the subcategories of category ID ${id}:`, subcategoriesData);
+          
+          // Log product IDs
+          console.log(`Product IDs for category ID ${id}:`, productsData.map(product => product.id));
         } else {
           console.log(`Category ID ${id} has no subcategories.`);
         }

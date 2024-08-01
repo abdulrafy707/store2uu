@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 
-
 const TopCategories = () => {
   const [categories, setCategories] = useState([]);
   const router = useRouter();
@@ -34,21 +33,21 @@ const TopCategories = () => {
   return (
     <div className="container mx-auto px-4 py-8 bg-white">
       <h2 className="text-2xl font-semibold mb-6">Categories</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {categories.map((category, index) => (
           <motion.div
             key={category.id}
-            className={`${backgroundColors[index % backgroundColors.length]} rounded-lg shadow-lg overflow-hidden text-center p-4 cursor-pointer`}
+            className={`${backgroundColors[index % backgroundColors.length]} rounded-lg shadow-lg overflow-hidden text-center p-2 cursor-pointer`}
             onClick={() => handleCategoryClick(category.id)}
             whileHover={{ scale: 1.05, boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.1)" }}
             transition={{ duration: 0.3 }}
-            style={{ minHeight: '300px' }} // Adjust the minHeight value as needed
+            style={{ minHeight: '150px' }} // Adjust the minHeight value as needed
           >
             {category.imageUrl ? (
               <motion.img
                 src={`https://appstore.store2u.ca/uploads/${category.imageUrl}`}
                 alt={category.name}
-                className="w-full h-48 object-cover mb-4" // Increased height
+                className="w-full h-32 object-cover mb-2" // Decreased height
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.3 }}
                 onError={(e) => {
@@ -61,10 +60,10 @@ const TopCategories = () => {
               <img
                 src="/fallback-image.jpg"
                 alt={category.name}
-                className="w-full h-48 object-cover mb-4" // Increased height
+                className="w-full h-32 object-cover mb-2" // Decreased height
               />
             )}
-            <p className="text-lg font-semibold">{category.name}</p>
+            <p className="text-md font-normal">{category.name}</p>
             <p className="text-gray-500">{category.tagline}</p>
           </motion.div>
         ))}

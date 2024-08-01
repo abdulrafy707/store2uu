@@ -408,7 +408,7 @@ const AddProductPageContent = () => {
 
         <div className="flex justify-end space-x-2 mt-4">
           <button
-            onClick={() => router.push('/admin/pages/products')}
+            onClick={() => router.push('/admin/pages/Products')}
             className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
           >
             Cancel

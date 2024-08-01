@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/react/24/outline';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
@@ -14,6 +14,15 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [editProduct, setEditProduct] = useState(null);
+  const [productForm, setProductForm] = useState({
+    name: '',
+    description: '',
+    price: '',
+    stock: '',
+    subcategoryId: '',
+    images: []
+  });
   const fileInputRef = useRef(null);
   const router = useRouter();
 
@@ -57,12 +66,64 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
     setIsLoading(false);
   };
 
-  const navigateToAddProductPage = (productId) => {
-    router.push(`/admin/pages/add-product?id=${productId}`);
+  const handleEditItem = (item) => {
+    setEditProduct(item);
+    setProductForm({
+      name: item.name,
+      description: item.description,
+      price: item.price,
+      stock: item.stock,
+      subcategoryId: item.subcategoryId,
+      images: item.images
+    });
   };
 
-  const handleEditItem = (item) => {
-    navigateToAddProductPage(item.id);
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setProductForm({ ...productForm, [name]: value });
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/products/${editProduct.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productForm),
+      });
+      if (response.ok) {
+        fetchProducts();
+        setEditProduct(null);
+        setProductForm({
+          name: '',
+          description: '',
+          price: '',
+          stock: '',
+          subcategoryId: '',
+          images: []
+        });
+      } else {
+        console.error('Failed to update product');
+      }
+    } catch (error) {
+      console.error('Error updating product:', error);
+    }
+    setIsLoading(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditProduct(null);
+    setProductForm({
+      name: '',
+      description: '',
+      price: '',
+      stock: '',
+      subcategoryId: '',
+      images: []
+    });
   };
 
   return (
@@ -107,7 +168,7 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="w-[10px] px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
@@ -124,16 +185,8 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
                     ) : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.id}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500 max-w-[50px]">
-                    <div className="overflow-hidden whitespace-normal">
-                      {item.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 max-w-[50px]">
-                    <div className="overflow-hidden whitespace-normal">
-                      {item.description}  {/* Show plain text description */}
-                    </div>
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{item.name}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500">{item.description}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.price}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.stock}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(item.updatedAt).toLocaleString()}</td>
@@ -144,12 +197,12 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
                     >
                       Edit
                     </button>
-                    <button
+                    {/* <button
                       onClick={() => handleDeleteItem(item.id)}
                       className="text-red-600 hover:text-red-900 transition duration-150 ease-in-out"
                     >
                       Delete
-                    </button>
+                    </button> */}
                   </td>
                 </tr>
               ))}
@@ -157,6 +210,92 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
           </table>
         </div>
       </div>
+
+      {editProduct && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-4 w-[700px] rounded shadow-lg">
+            <h2 className="text-xl mb-4">Edit Product</h2>
+            <form onSubmit={handleFormSubmit}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={productForm.name}
+                  onChange={handleFormChange}
+                  className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <ReactQuill
+                  value={productForm.description}
+                  onChange={(value) => setProductForm({ ...productForm, description: value })}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Price</label>
+                <input
+                  type="number"
+                  name="price"
+                  value={productForm.price}
+                  onChange={handleFormChange}
+                  className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Stock</label>
+                <input
+                  type="number"
+                  name="stock"
+                  value={productForm.stock}
+                  onChange={handleFormChange}
+                  className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Subcategory</label>
+                <select
+                  name="subcategoryId"
+                  value={productForm.subcategoryId}
+                  onChange={handleFormChange}
+                  className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Subcategory</option>
+                  {filteredSubcategories.map(subcat => (
+                    <option key={subcat.id} value={subcat.id}>{subcat.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Images</label>
+                <input
+                  type="file"
+                  name="images"
+                  ref={fileInputRef}
+                  onChange={(e) => setProductForm({ ...productForm, images: [...e.target.files] })}
+                  className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Update
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

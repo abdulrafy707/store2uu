@@ -90,7 +90,7 @@ const Products = () => {
                     <img
                       src={`https://appstore.store2u.ca/uploads/${category.imageUrl}`}
                       alt={category.name}
-                      className="w-full h-[400px] rounded-lg shadow-md"
+                      className="w-full h-[300px] rounded-lg shadow-md"
                     />
                   ) : (
                     <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
@@ -101,7 +101,7 @@ const Products = () => {
                   <p className="text-gray-500 mt-2">{category.description}</p>
                 </div>
                 <div className="w-3/4 relative">
-                  <h2 className="text-3xl font-bold mb-6">{category.name} Products</h2>
+                  {/* <h2 className="text-3xl font-bold mb-6">{category.name} Products</h2> */}
                   <FiChevronLeft
                     className="h-6 w-6 text-gray-500 cursor-pointer absolute left-0 top-1/2 transform -translate-y-1/2 z-10"
                     onClick={() => scrollLeft(index)}
@@ -129,7 +129,7 @@ const Products = () => {
                             </div>
                           )}
                           <div className="absolute top-2 right-2">
-                            <FiPlusCircle className="h-6 w-6 text-teal-500 cursor-pointer" />
+                            {/* <FiPlusCircle className="h-6 w-6 text-teal-500 cursor-pointer" /> */}
                           </div>
                           <h3 className="text-xl mb-2 overflow-hidden text-ellipsis whitespace-nowrap">{product.name}</h3>
                           <p className="text-lg font-medium text-gray-700 mb-1">Rs.{product.price}</p>

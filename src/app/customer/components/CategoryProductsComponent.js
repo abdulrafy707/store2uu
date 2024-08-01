@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { useRouter } from 'next/navigation'; // Import the useRouter hook
 
 const SubcategoryProductsComponent = () => {
   const [subcategories, setSubcategories] = useState([]);
@@ -13,20 +14,14 @@ const SubcategoryProductsComponent = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 5;
 
+  const router = useRouter(); // Initialize the useRouter hook
+
   useEffect(() => {
     const fetchSubcategories = async () => {
       try {
         const subcategoriesResponse = await axios.get('/api/subcategories');
         const subcategoriesData = subcategoriesResponse.data;
         setSubcategories(subcategoriesData);
-
-        // Log all subcategories and their related products
-        subcategoriesData.forEach(subcategory => {
-          console.log(`Subcategory ${subcategory.id}: ${subcategory.name}`);
-          subcategory.products.forEach(product => {
-            console.log(`  Product ${product.id}: ${product.name}`);
-          });
-        });
       } catch (error) {
         console.error('Error fetching subcategories:', error);
       }
@@ -34,13 +29,28 @@ const SubcategoryProductsComponent = () => {
     fetchSubcategories();
   }, []);
 
-  const handleSubcategoryClick = (subcategoryId) => {
+  const fetchProducts = async (subcategoryId) => {
+    try {
+      const productsResponse = await axios.get(`/api/products?subcategoryId=${subcategoryId}`);
+      const productsData = productsResponse.data;
+      setProducts(productsData);
+      setFilteredProducts(productsData.slice(0, productsPerPage));
+      setCurrentPage(1);
+
+      // Log products in the terminal including image URLs
+      productsData.forEach(product => {
+        const imageUrls = product.images.map(image => image.url);
+        console.log(`Product ${product.id}: ${product.name}`);
+        console.log(`  Image URLs: ${imageUrls.join(', ')}`);
+      });
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
+
+  const handleSubcategoryClick = async (subcategoryId) => {
     setSelectedSubcategory(subcategoryId);
-    setCurrentPage(1);
-    const subcategory = subcategories.find(subcat => subcat.id === subcategoryId);
-    setProducts(subcategory.products);
-    console.log(subcategory.products);
-    setFilteredProducts(subcategory.products.slice(0, productsPerPage));
+    await fetchProducts(subcategoryId);
   };
 
   const handleNextPage = () => {
@@ -57,6 +67,10 @@ const SubcategoryProductsComponent = () => {
     const endIndex = startIndex + productsPerPage;
     setFilteredProducts(products.slice(startIndex, endIndex));
     setCurrentPage(previousPage);
+  };
+
+  const handleProductClick = (productId) => {
+    router.push(`/customer/pages/products/${productId}`);
   };
 
   return (
@@ -85,6 +99,7 @@ const SubcategoryProductsComponent = () => {
                   className="bg-white shadow-md rounded-lg p-4 relative cursor-pointer"
                   whileHover={{ scale: 1.05, boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.1)" }}
                   transition={{ duration: 0.3 }}
+                  onClick={() => handleProductClick(product.id)} // Handle product click
                 >
                   {product.images && product.images.length > 0 ? (
                     <motion.img

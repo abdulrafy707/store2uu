@@ -230,7 +230,6 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone No</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">City</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Updated At</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -246,7 +245,6 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.phoneno}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.city}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(item.createdAt).toLocaleString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(item.updatedAt).toLocaleString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     <button

@@ -8,15 +8,15 @@ const Header = () => {
     <header className="flex items-center justify-between bg-gray-700 p-3">
       <div className="flex items-center">
         <button className="text-white text-xl px-2">
-          <FontAwesomeIcon icon={faBars} />
+          {/* <FontAwesomeIcon icon={faBars} /> */}
         </button>
         <div className="flex items-center ml-4">
-          <Image className='rounded-full'
+          {/* <Image className='rounded-full'
             src="/ali.png"
             alt="Pluto Logo"
             width={40}
             height={40}
-          />
+          /> */}
           <span className="text-white text-2xl font-semibold ml-2">Store2u</span>
         </div>
       </div>
