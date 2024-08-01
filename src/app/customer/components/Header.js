@@ -43,7 +43,7 @@ const Header = () => {
     const query = e.target.value;
     setSearchQuery(query);
     if (query.trim() !== '') {
-      router.push(`/customer/pages/allproducts?search=${query.trim()}`);
+      router.push(`/customer/pages/allproducts/id?search=${query.trim()}`);
     }
   };
   
