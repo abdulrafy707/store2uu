@@ -13,19 +13,20 @@ const AllProducts = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-        try {
-          const response = await axios.get(`/api/products?search=${query}`);
-          setProducts(response.data);
-          setLoading(false);
-        } catch (error) {
-          console.error('Error fetching products:', error);
-          setLoading(false);
-        }
-      };
-      
+      try {
+        const response = await axios.get(`/api/products?search=${query}`);
+        setProducts(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setLoading(false);
+      }
+    };
 
     if (query) {
       fetchProducts();
+    } else {
+      setLoading(false);
     }
   }, [query]);
 

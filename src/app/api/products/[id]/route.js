@@ -78,36 +78,29 @@ import prisma from '../../../util/prisma';
 
 
 
-export async function GET(request, { params }) {
+export async function GET(request) {
+  const url = new URL(request.url);
+  const searchQuery = url.searchParams.get('search');
+
   try {
-    const id = parseInt(params.id);
-
-    // Fetch the product with its images and subcategory
-    const product = await prisma.product.findUnique({
-      where: { id: id },
-      include: {
-        images: true,
-        subcategory: true,
-      },
-    });
-
-    // Fetch related products based on the same subcategory
-    const relatedProducts = await prisma.product.findMany({
+    const products = await prisma.product.findMany({
       where: {
-        subcategoryId: product.subcategoryId,
-        id: { not: id },
+        name: {
+          contains: searchQuery,
+          mode: 'insensitive', // Case-insensitive search
+        },
       },
       include: {
         images: true,
       },
     });
 
-    return NextResponse.json({ product, relatedProducts });
+    return NextResponse.json(products);
   } catch (error) {
-    console.error('Error fetching product:', error);
+    console.error('Error fetching products:', error);
     return NextResponse.json(
       {
-        message: 'Failed to fetch product',
+        message: 'Failed to fetch products',
         status: false,
         error: error.message,
       },
