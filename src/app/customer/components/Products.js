@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { FiPlusCircle, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 
 const Products = () => {
   const [categories, setCategories] = useState([]);
@@ -40,7 +41,11 @@ const Products = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <AiOutlineLoading3Quarters className="w-16 h-16 text-blue-500 animate-spin" />
+      </div>
+    );
   }
 
   const handleProductClick = (id) => {
@@ -101,7 +106,6 @@ const Products = () => {
                   <p className="text-gray-500 mt-2">{category.description}</p>
                 </div>
                 <div className="w-3/4 relative">
-                  {/* <h2 className="text-3xl font-bold mb-6">{category.name} Products</h2> */}
                   <FiChevronLeft
                     className="h-6 w-6 text-gray-500 cursor-pointer absolute left-0 top-1/2 transform -translate-y-1/2 z-10"
                     onClick={() => scrollLeft(index)}

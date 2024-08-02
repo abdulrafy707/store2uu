@@ -17,6 +17,7 @@
     "autoprefixer": "^10.4.19",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
+    "formidable": "^3.5.1",
     "framer-motion": "^11.3.19",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",

@@ -63,52 +63,20 @@ export async function POST(request) {
 //   }
 // }
 
-// export async function GET() {
-//   try {
-//     const subcategories = await prisma.subcategory.findMany({
-//       include: {
-//         category: true,
-//       },
-//     });
-
-//     return NextResponse.json(subcategories);
-//   } catch (error) {
-//     console.error('Error fetching subcategories:', error);
-//     return NextResponse.json(
-//       {
-//         message: 'Failed to fetch subcategories',
-//         status: false,
-//         error: error.message,
-//       },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-
-
 export async function GET() {
   try {
     const subcategories = await prisma.subcategory.findMany({
       include: {
-        products: true,
+        category: true,
       },
-    });
-
-    // Log subcategories and their related products to the terminal
-    subcategories.forEach(subcategory => {
-      console.log(`Subcategory ${subcategory.id}: ${subcategory.name}`);
-      subcategory.products.forEach(product => {
-        console.log(`  Product ${product.id}: ${product.name}`);
-      });
     });
 
     return NextResponse.json(subcategories);
   } catch (error) {
-    console.error('Error fetching subcategories and products:', error);
+    console.error('Error fetching subcategories:', error);
     return NextResponse.json(
       {
-        message: 'Failed to fetch subcategories and products',
+        message: 'Failed to fetch subcategories',
         status: false,
         error: error.message,
       },
@@ -116,6 +84,38 @@ export async function GET() {
     );
   }
 }
+
+
+
+// export async function GET() {
+//   try {
+//     const subcategories = await prisma.subcategory.findMany({
+//       include: {
+//         products: true,
+//       },
+//     });
+
+//     // Log subcategories and their related products to the terminal
+//     subcategories.forEach(subcategory => {
+//       console.log(`Subcategory ${subcategory.id}: ${subcategory.name}`);
+//       subcategory.products.forEach(product => {
+//         console.log(`  Product ${product.id}: ${product.name}`);
+//       });
+//     });
+
+//     return NextResponse.json(subcategories);
+//   } catch (error) {
+//     console.error('Error fetching subcategories and products:', error);
+//     return NextResponse.json(
+//       {
+//         message: 'Failed to fetch subcategories and products',
+//         status: false,
+//         error: error.message,
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
 
 
 

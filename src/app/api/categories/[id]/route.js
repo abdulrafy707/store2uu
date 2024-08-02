@@ -55,10 +55,10 @@ export async function GET(request, { params }) {
 // Update an existing category
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const id = parseInt(params.id, 10);
     const { name, imageUrl } = await request.json();
     const updatedCategory = await prisma.category.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: {
         name,
         imageUrl,

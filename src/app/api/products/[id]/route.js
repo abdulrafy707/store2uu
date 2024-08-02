@@ -1,6 +1,56 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../util/prisma';
 
+export const config = {
+  api: {
+    bodyParser: true,
+  },
+};
+
+export async function PUT(request, { params }) {
+  try {
+    const id = parseInt(params.id);
+    const { name, description, price, stock, subcategoryId, colors, sizes, images } = await request.json();
+
+    const updatedProduct = await prisma.product.update({
+      where: { id: id },
+      data: {
+        name,
+        description,
+        price: parseFloat(price),
+        stock: parseInt(stock),
+        subcategoryId: subcategoryId ? parseInt(subcategoryId) : null,
+        colors: colors ? JSON.parse(colors) : null,
+        sizes: sizes ? JSON.parse(sizes) : null,
+        updatedAt: new Date(),
+      },
+    });
+
+    if (images && images.length > 0) {
+      await prisma.image.createMany({
+        data: images.map((imageBase64) => ({
+          url: imageBase64,
+          productId: id,
+        })),
+      });
+    }
+
+    return NextResponse.json(updatedProduct);
+  } catch (error) {
+    console.error('Error updating product:', error);
+    return NextResponse.json(
+      {
+        message: 'Failed to update product',
+        status: false,
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+
+
 // export async function GET(request) {
 //   try {
 //     const { searchParams } = new URL(request.url);
@@ -161,72 +211,72 @@ export async function GET(request) {
 // }
 
 
-export async function PUT(request, { params }) {
-  try {
-    const id = parseInt(params.id);
-    const { name, description, price, stock, subcategoryId, colors, sizes, images } = await request.json();
+// export async function PUT(request, { params }) {
+//   try {
+//     const id = parseInt(params.id);
+//     const { name, description, price, stock, subcategoryId, colors, sizes, images } = await request.json();
 
-    const updatedProduct = await prisma.product.update({
-      where: { id: id },
-      data: {
-        name,
-        description,
-        price: parseFloat(price),
-        stock: parseInt(stock),
-        subcategoryId: subcategoryId ? parseInt(subcategoryId) : null,
-        colors: colors ? JSON.parse(colors) : null,
-        sizes: sizes ? JSON.parse(sizes) : null,
-        updatedAt: new Date(),
-      },
-    });
+//     const updatedProduct = await prisma.product.update({
+//       where: { id: id },
+//       data: {
+//         name,
+//         description,
+//         price: parseFloat(price),
+//         stock: parseInt(stock),
+//         subcategoryId: subcategoryId ? parseInt(subcategoryId) : null,
+//         colors: colors ? JSON.parse(colors) : null,
+//         sizes: sizes ? JSON.parse(sizes) : null,
+//         updatedAt: new Date(),
+//       },
+//     });
 
-    // Add new images without deleting existing ones
-    if (images && images.length > 0) {
-      const imageUrls = await Promise.all(images.map(async (image) => {
-        if (typeof image === 'string') {
-          return image;
-        } else if (image.base64) {
-          const response = await fetch('https://appstore.store2u.ca/uploadImage.php', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ image: image.base64 }),
-          });
-          const result = await response.json();
-          if (response.ok) {
-            return result.image_url;
-          } else {
-            throw new Error(result.error || 'Failed to upload image');
-          }
-        }
-        return null;
-      }));
+//     // Add new images without deleting existing ones
+//     if (images && images.length > 0) {
+//       const imageUrls = await Promise.all(images.map(async (image) => {
+//         if (typeof image === 'string') {
+//           return image;
+//         } else if (image.base64) {
+//           const response = await fetch('https://appstore.store2u.ca/uploadImage.php', {
+//             method: 'POST',
+//             headers: {
+//               'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify({ image: image.base64 }),
+//           });
+//           const result = await response.json();
+//           if (response.ok) {
+//             return result.image_url;
+//           } else {
+//             throw new Error(result.error || 'Failed to upload image');
+//           }
+//         }
+//         return null;
+//       }));
 
-      const validImageUrls = imageUrls.filter(url => url !== null);
+//       const validImageUrls = imageUrls.filter(url => url !== null);
 
-      await prisma.image.createMany({
-        data: validImageUrls.map(url => ({
-          url,
-          productId: id,
-        })),
-      });
-      console.log(`Added new images for product ID: ${id}`);
-    }
+//       await prisma.image.createMany({
+//         data: validImageUrls.map(url => ({
+//           url,
+//           productId: id,
+//         })),
+//       });
+//       console.log(`Added new images for product ID: ${id}`);
+//     }
 
-    return NextResponse.json(updatedProduct);
-  } catch (error) {
-    console.error('Error updating product:', error);
-    return NextResponse.json(
-      {
-        message: 'Failed to update product',
-        status: false,
-        error: error.message,
-      },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json(updatedProduct);
+//   } catch (error) {
+//     console.error('Error updating product:', error);
+//     return NextResponse.json(
+//       {
+//         message: 'Failed to update product',
+//         status: false,
+//         error: error.message,
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
 
 
 

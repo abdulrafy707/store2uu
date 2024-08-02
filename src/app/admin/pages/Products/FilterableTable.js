@@ -86,14 +86,32 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+  
+    const imagesBase64 = await Promise.all(
+      [...fileInputRef.current.files].map((file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = (error) => reject(error);
+        });
+      })
+    );
+  
+    const productData = {
+      ...productForm,
+      images: imagesBase64,
+    };
+  
     try {
       const response = await fetch(`/api/products/${editProduct.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(productForm),
+        body: JSON.stringify(productData),
       });
+  
       if (response.ok) {
         fetchProducts();
         setEditProduct(null);
@@ -103,7 +121,7 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
           price: '',
           stock: '',
           subcategoryId: '',
-          images: []
+          images: [],
         });
       } else {
         console.error('Failed to update product');
@@ -113,6 +131,7 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
     }
     setIsLoading(false);
   };
+  
 
   const handleCancelEdit = () => {
     setEditProduct(null);
@@ -124,6 +143,11 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
       subcategoryId: '',
       images: []
     });
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setProductForm({ ...productForm, images: [...productForm.images, ...files] });
   };
 
   return (
@@ -273,8 +297,9 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
                   type="file"
                   name="images"
                   ref={fileInputRef}
-                  onChange={(e) => setProductForm({ ...productForm, images: [...e.target.files] })}
+                  onChange={handleImageChange}
                   className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  multiple
                 />
               </div>
               <div className="flex justify-end space-x-2">

@@ -183,7 +183,7 @@ const FilterableTable = ({ subcategories = [], fetchSubcategories, categories = 
                       {item.imageUrl && <img src={`https://appstore.store2u.ca/uploads/${item.imageUrl}`} alt={item.name} className="w-16 h-16 object-cover" />}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.category.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.category?.name || 'N/A'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(item.createdAt).toLocaleString()}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(item.updatedAt).toLocaleString()}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
@@ -204,7 +204,7 @@ const FilterableTable = ({ subcategories = [], fetchSubcategories, categories = 
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500">No data available</td>
+                  <td colSpan="7" className="px-6 py-4 text-center text-gray-500">No data available</td>
                 </tr>
               )}
             </tbody>
