@@ -4,8 +4,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { FiPlusCircle, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { ThreeDots } from 'react-loader-spinner';
 
 const Products = () => {
   const [categories, setCategories] = useState([]);
@@ -43,7 +43,14 @@ const Products = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <AiOutlineLoading3Quarters className="w-16 h-16 text-blue-500 animate-spin" />
+        <ThreeDots
+          height="80"
+          width="80"
+          radius="9"
+          color="#3498db"
+          ariaLabel="three-dots-loading"
+          visible={true}
+        />
       </div>
     );
   }
@@ -102,7 +109,7 @@ const Products = () => {
                       No Image
                     </div>
                   )}
-                  <h3 className="text-2xl text-gray-800 font-normal mt-4">{category.name}</h3>
+                  <h3 className="text-xl text-gray-800 font-normal mt-4">{category.name}</h3>
                   <p className="text-gray-500 mt-2">{category.description}</p>
                 </div>
                 <div className="w-3/4 relative">
@@ -115,7 +122,7 @@ const Products = () => {
                       categoryProducts.map((product) => (
                         <div
                           key={product.id}
-                          className="bg-white shadow-md rounded-lg p-4 relative cursor-pointer w-60 h-72 flex-shrink-0"
+                          className="bg-white shadow-md rounded-lg p-4 relative cursor-pointer w-60 h-72 flex-shrink-0 border border-gray-300"
                           onClick={() => handleProductClick(product.id)}
                         >
                           {product.images && product.images.length > 0 ? (
