@@ -22,15 +22,15 @@ const Sidebar = ({ setActiveComponent }) => {
     }));
   };
 
-  useEffect(() => {
-    const token = Cookies.get('token');
-    if (!token) {
-      alert('Login to see the dashboard!');
-      router.push('/admin');
-    } else {
-      const decodedToken = jwtDecode(token);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const token = Cookies.get('token');
+  //   if (!token) {
+  //     alert('Login to see the dashboard!');
+  //     router.push('/admin');
+  //   } else {
+  //     const decodedToken = jwtDecode(token);
+  //   }
+  // }, []);
 
   
 
