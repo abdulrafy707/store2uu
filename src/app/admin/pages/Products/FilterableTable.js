@@ -74,7 +74,7 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
       price: item.price,
       stock: item.stock,
       subcategoryId: item.subcategoryId,
-      images: item.images
+      images: item.images.map((image) => ({ url: image.url })), // Ensure proper structure
     });
   };
 
@@ -83,27 +83,42 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
     setProductForm({ ...productForm, [name]: value });
   };
 
+  const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-  
-    const imagesBase64 = await Promise.all(
-      [...fileInputRef.current.files].map((file) => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result.split(',')[1]);
-          reader.onerror = (error) => reject(error);
-        });
-      })
-    );
-  
-    const productData = {
-      ...productForm,
-      images: imagesBase64,
-    };
-  
+
     try {
+      const uploadedImages = await Promise.all([...fileInputRef.current.files].map(async (file) => {
+        const imageBase64 = await convertToBase64(file);
+        const response = await fetch('https://appstore.store2u.ca/uploadImage.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ image: imageBase64 }),
+        });
+        const result = await response.json();
+        if (response.ok) {
+          return result.image_url;
+        } else {
+          throw new Error(result.error || 'Failed to upload image');
+        }
+      }));
+
+      const productData = {
+        ...productForm,
+        images: [...productForm.images.map(img => img.url), ...uploadedImages],
+      };
+
       const response = await fetch(`/api/products/${editProduct.id}`, {
         method: 'PUT',
         headers: {
@@ -111,7 +126,7 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
         },
         body: JSON.stringify(productData),
       });
-  
+
       if (response.ok) {
         fetchProducts();
         setEditProduct(null);
@@ -131,7 +146,6 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
     }
     setIsLoading(false);
   };
-  
 
   const handleCancelEdit = () => {
     setEditProduct(null);
@@ -205,7 +219,7 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
                 <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {item.images && item.images.length > 0 ? (
-                      <img src={`https://appstore.store2u.ca/uploads/${item.images[0].url}`} alt={item.name} className="w-12 h-12 object-cover" />
+                      <img src={`https://appstore.store2u.ca/uploads/${item.images[0].url}`} alt={item.name} className="w-16 h-16 object-cover" />
                     ) : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.id}</td>
@@ -221,12 +235,12 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
                     >
                       Edit
                     </button>
-                    {/* <button
+                    <button
                       onClick={() => handleDeleteItem(item.id)}
                       className="text-red-600 hover:text-red-900 transition duration-150 ease-in-out"
                     >
                       Delete
-                    </button> */}
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -301,6 +315,28 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
                   className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                   multiple
                 />
+              </div>
+              <div className="mb-4">
+                <h4 className="text-md font-medium mb-2">Existing Images</h4>
+                {productForm.images.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {productForm.images.map((img, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={img.url.startsWith('data:image/') ? img.url : `https://appstore.store2u.ca/uploads/${img.url}`}
+                          alt={`Product Image ${index}`}
+                          className="w-full h-32 object-cover"
+                        />
+                        <button
+                          onClick={() => handleRemoveExistingImage(index)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                        >
+                          X
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="flex justify-end space-x-2">
                 <button

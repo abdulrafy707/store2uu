@@ -50,6 +50,65 @@ export async function PUT(request, { params }) {
   }
 }
 
+
+
+
+
+export async function GET(request, { params }) {
+  const { id } = params;
+  try {
+    // Fetch the product by ID
+    const product = await prisma.product.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        images: true,
+      },
+    });
+
+    if (!product) {
+      return NextResponse.json({
+        message: 'Product not found',
+        status: false,
+      }, { status: 404 });
+    }
+
+    // Fetch related products based on subcategoryId
+    const relatedProducts = await prisma.product.findMany({
+      where: {
+        subcategoryId: product.subcategoryId,
+        id: {
+          not: parseInt(id), // Exclude the current product
+        },
+      },
+      include: {
+        images: true,
+      },
+      take: 4, // Limit the number of related products
+    });
+
+    return NextResponse.json({
+      status: 200,
+      message: 'Product fetched successfully',
+      data: {
+        product,
+        relatedProducts,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    return NextResponse.json(
+      {
+        message: 'Failed to fetch product',
+        status: false,
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+
+
 // export const config = {
 //   api: {
 //     bodyParser: true,
@@ -100,80 +159,80 @@ export async function PUT(request, { params }) {
 
 
 
-// // export async function GET(request) {
-// //   try {
-// //     const { searchParams } = new URL(request.url);
-// //     const id = searchParams.get('id');
-// //     const name = searchParams.get('search');
+// export async function GET(request) {
+//   try {
+//     const { searchParams } = new URL(request.url);
+//     const id = searchParams.get('id');
+//     const name = searchParams.get('search');
 
-// //     if (id) {
-// //       // Fetch the product with its images and subcategory by ID
-// //       const product = await prisma.product.findUnique({
-// //         where: { id: parseInt(id) },
-// //         include: {
-// //           images: true,
-// //           subcategory: true,
-// //         },
-// //       });
+//     if (id) {
+//       // Fetch the product with its images and subcategory by ID
+//       const product = await prisma.product.findUnique({
+//         where: { id: parseInt(id) },
+//         include: {
+//           images: true,
+//           subcategory: true,
+//         },
+//       });
 
-// //       if (!product) {
-// //         return NextResponse.json(
-// //           { message: 'Product not found', status: false },
-// //           { status: 404 }
-// //         );
-// //       }
+//       if (!product) {
+//         return NextResponse.json(
+//           { message: 'Product not found', status: false },
+//           { status: 404 }
+//         );
+//       }
 
-// //       // Fetch related products based on the same subcategory
-// //       const relatedProducts = await prisma.product.findMany({
-// //         where: {
-// //           subcategoryId: product.subcategoryId,
-// //           id: { not: parseInt(id) },
-// //         },
-// //         include: {
-// //           images: true,
-// //         },
-// //       });
+//       // Fetch related products based on the same subcategory
+//       const relatedProducts = await prisma.product.findMany({
+//         where: {
+//           subcategoryId: product.subcategoryId,
+//           id: { not: parseInt(id) },
+//         },
+//         include: {
+//           images: true,
+//         },
+//       });
 
-// //       return NextResponse.json({ product, relatedProducts });
-// //     } else if (name) {
-// //       // Fetch products that match the name search query
-// //       const products = await prisma.product.findMany({
-// //         where: {
-// //           name: {
-// //             contains: name,
-// //             mode: 'insensitive', // Case insensitive search
-// //           },
-// //         },
-// //         include: {
-// //           images: true,
-// //           subcategory: true,
-// //         },
-// //       });
+//       return NextResponse.json({ product, relatedProducts });
+//     } else if (name) {
+//       // Fetch products that match the name search query
+//       const products = await prisma.product.findMany({
+//         where: {
+//           name: {
+//             contains: name,
+//             mode: 'insensitive', // Case insensitive search
+//           },
+//         },
+//         include: {
+//           images: true,
+//           subcategory: true,
+//         },
+//       });
 
-// //       return NextResponse.json(products);
-// //     } else {
-// //       // Fetch all products if no filter is applied
-// //       const products = await prisma.product.findMany({
-// //         include: {
-// //           images: true,
-// //           subcategory: true,
-// //         },
-// //       });
+//       return NextResponse.json(products);
+//     } else {
+//       // Fetch all products if no filter is applied
+//       const products = await prisma.product.findMany({
+//         include: {
+//           images: true,
+//           subcategory: true,
+//         },
+//       });
 
-// //       return NextResponse.json(products);
-// //     }
-// //   } catch (error) {
-// //     console.error('Error fetching products:', error);
-// //     return NextResponse.json(
-// //       {
-// //         message: 'Failed to fetch products',
-// //         status: false,
-// //         error: error.message,
-// //       },
-// //       { status: 500 }
-// //     );
-// //   }
-// // }
+//       return NextResponse.json(products);
+//     }
+//   } catch (error) {
+//     console.error('Error fetching products:', error);
+//     return NextResponse.json(
+//       {
+//         message: 'Failed to fetch products',
+//         status: false,
+//         error: error.message,
+//       },
+//       { status: 500 }
+//     );
+//   }
+// }
 
 
 

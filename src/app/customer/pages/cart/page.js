@@ -29,14 +29,14 @@ const CartPage = () => {
   };
 
   const handleCheckout = () => {
-    const token = localStorage.getItem('token'); // Assuming the token is stored in localStorage
+    const token = sessionStorage.getItem('authToken'); // Retrieve token from session storage
     if (token) {
       try {
         const decoded = jwtDecode(token);
         if (decoded && decoded.exp > Date.now() / 1000) {
           router.push(`/customer/pages/checkout?total=${total}`);
         } else {
-          localStorage.removeItem('token'); // Remove invalid token
+          sessionStorage.removeItem('authToken'); // Remove invalid token
           router.push('/customer/pages/login');
         }
       } catch (error) {
@@ -92,7 +92,7 @@ const CartPage = () => {
   return (
     <div className="container bg-white mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
-        <div className="w-full lg:w-3/5 border border-gray-400 p-4"> {/* Add border class */}
+        <div className="w-full lg:w-3/5 border border-gray-400 p-4">
           <h2 className="text-2xl font-semibold mb-6">Your Cart</h2>
           <div className="flex flex-col gap-4">
             {cart.map((item, index) => (
@@ -138,7 +138,7 @@ const CartPage = () => {
             ))}
           </div>
         </div>
-        <div className="w-full lg:w-2/5 border border-gray-400 p-4"> {/* Add border class */}
+        <div className="w-full lg:w-2/5 border border-gray-400 p-4">
           <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
           <div className="bg-white shadow-lg rounded-lg p-4 flex flex-col gap-2">
             <div className="flex justify-between">
@@ -153,7 +153,7 @@ const CartPage = () => {
               <p className="text-md font-medium text-gray-700">Delivery Charge:</p>
               <p className="text-md text-gray-700">Rs.{deliveryCharge}</p>
             </div>
-            <hr className='h-2'></hr>
+            <hr className="h-2"></hr>
             <div className="flex justify-between">
               <p className="text-xl font-bold text-gray-700">Total:</p>
               <p className="text-md text-gray-700">Rs.{total}</p>

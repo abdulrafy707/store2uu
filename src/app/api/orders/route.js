@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../util/prisma';
 import jwt from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
 
 export async function GET() {
   try {
@@ -27,17 +28,40 @@ export async function GET() {
   }
 }
 
+
+
+
+
+
+// const prisma = new PrismaClient();
+const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
+
 export async function POST(request) {
   try {
-    const authToken = request.cookies.get("authToken")?.value;
+    console.log('Received request for placing order');
+
+    const authToken = request.headers.get('Authorization')?.split(' ')[1];
+    console.log('Auth token:', authToken);
+
     if (!authToken) {
+      console.log('No auth token provided');
       return NextResponse.json({ message: 'Unauthorized', status: false }, { status: 401 });
     }
 
-    const decoded = jwt.verify(authToken, process.env.JWT_KEY);
+    let decoded;
+    try {
+      decoded = jwt.verify(authToken, SECRET_KEY);
+      console.log('Decoded token:', decoded);
+    } catch (error) {
+      console.log('Token verification failed:', error);
+      return NextResponse.json({ message: 'Unauthorized', status: false }, { status: 401 });
+    }
+
     const { shippingAddress, paymentMethod, paymentInfo, items, total } = await request.json();
+    console.log('Order data:', { shippingAddress, paymentMethod, paymentInfo, items, total });
 
     if (!decoded.id || !items || items.length === 0 || !total) {
+      console.log('Invalid order data');
       return NextResponse.json({ message: 'Invalid order data', status: false }, { status: 400 });
     }
 
@@ -70,12 +94,18 @@ export async function POST(request) {
       },
     });
 
+    console.log('Order placed successfully:', newOrder);
     return NextResponse.json({ message: 'Order placed successfully', data: newOrder, status: true }, { status: 200 });
   } catch (error) {
     console.error('Error placing order:', error);
     return NextResponse.json({ message: 'Failed to place order', error: error.message, status: false }, { status: 500 });
   }
 }
+
+
+
+
+
 
 export async function PUT(request) {
   try {

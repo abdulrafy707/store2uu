@@ -23,18 +23,19 @@ const ProductPage = () => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(`/api/products/${id}`);
-        const { product, relatedProducts } = response.data;
+        const { product, relatedProducts } = response.data.data;
         setProduct(product);
         setRelatedProducts(relatedProducts);
       } catch (error) {
         console.error('Error fetching product:', error);
       }
     };
-
+  
     if (id) {
       fetchProduct();
     }
   }, [id]);
+  
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem('cart')) || [];

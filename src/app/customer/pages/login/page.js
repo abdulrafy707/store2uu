@@ -1,8 +1,9 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
-import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
+import {jwtDecode} from 'jwt-decode';
 
 const LoginForm = () => {
   const router = useRouter();
@@ -11,22 +12,16 @@ const LoginForm = () => {
   const [status, setStatus] = useState('');
 
   useEffect(() => {
-    const token = Cookies.get('token');
+    const token = sessionStorage.getItem('authToken');
     if (token) {
       const decodedToken = jwtDecode(token);
-      
       console.log("User name is: " + decodedToken.name);
       console.log("User role is: " + decodedToken.role);
-      if(decodedToken.role === 'CUSTOMER'){
+      if (decodedToken.role === 'CUSTOMER') {
         router.push('/customer/pages/checkout');
-      }
-      else{if(decodedToken.role === 'ADMIN'){
+      } else if (decodedToken.role === 'ADMIN') {
         router.push('/admin/pages/Products');
       }
-      
-    }
-      
-      
     }
   }, [router]);
 
@@ -46,22 +41,15 @@ const LoginForm = () => {
 
     if (res.ok) {
       setStatus('Login successful');
-      Cookies.set('token', data.token);
-      const token = Cookies.get('token');
-      if (token) {
-        const decodedToken = jwtDecode(token);
-        
-        console.log("User name is: " + decodedToken.name);
-        console.log("User role is: " + decodedToken.role);
-        if(decodedToken.role === 'CUSTOMER'){
-          router.push('/customer/pages/checkout');
-        }
-        else{if(decodedToken.role === 'ADMIN'){
-          router.push('/customer/pages/checkout');
-        }
-        
-      }
-         
+      sessionStorage.setItem('authToken', data.token); // Store token in sessionStorage
+      const token = data.token;
+      const decodedToken = jwtDecode(token);
+      console.log("User name is: " + decodedToken.name);
+      console.log("User role is: " + decodedToken.role);
+      if (decodedToken.role === 'CUSTOMER') {
+        router.push('/customer/pages/checkout');
+      } else if (decodedToken.role === 'ADMIN') {
+        router.push('/admin/pages/Products');
       }
     } else {
       setStatus(data.message || 'Error logging in');

@@ -1,4 +1,3 @@
-// src/app/api/login/route.js
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -10,7 +9,6 @@ const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 export async function POST(request) {
   const data = await request.json();
   const { email, password } = data;
-  console.log("email: ", email, "password: ", password);
 
   try {
     const user = await prisma.user.findUnique({

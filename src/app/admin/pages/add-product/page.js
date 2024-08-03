@@ -187,7 +187,7 @@ const AddProductPageContent = () => {
       });
 
       if (response.ok) {
-        router.push('/admin/pages/products');
+        router.push('/admin/pages/Products');
       } else {
         const errorData = await response.json();
         console.error('Failed to update product:', errorData.message);

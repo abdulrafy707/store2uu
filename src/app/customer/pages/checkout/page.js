@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { FiUser, FiHome, FiMapPin, FiPhone, FiMail, FiCreditCard, FiCalendar, FiLock } from 'react-icons/fi';
+import {jwtDecode} from 'jwt-decode';
 
 const CheckoutPage = () => {
   const [shippingAddress, setShippingAddress] = useState({
@@ -29,21 +30,55 @@ const CheckoutPage = () => {
   const router = useRouter();
 
   useEffect(() => {
+    const token = sessionStorage.getItem('authToken');
+    if (!token) {
+      alert('You need to log in to place an order');
+      router.push('/customer/pages/login'); // Redirect to login page if token is not found
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(token);
+      if (decoded.exp < Date.now() / 1000) {
+        sessionStorage.removeItem('authToken'); // Remove expired token
+        alert('Your session has expired. Please log in again.');
+        router.push('/customer/pages/login'); // Redirect to login page
+        return;
+      }
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      alert('An error occurred. Please log in again.');
+      router.push('/customer/pages/login'); // Redirect to login page
+      return;
+    }
+
     const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
     setCart(storedCart);
 
     const totalAmount = storedCart.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
     setTotal(totalAmount);
-  }, []);
+  }, [router]);
 
   const handlePlaceOrder = async () => {
     try {
+      const token = sessionStorage.getItem('authToken'); // Retrieve the auth token from session storage
+
+      if (!token) {
+        alert('You need to log in to place an order');
+        router.push('/customer/pages/login'); // Redirect to login page if token is not found
+        return;
+      }
+
       const response = await axios.post('/api/orders', {
         shippingAddress,
         paymentMethod,
         paymentInfo: paymentMethod === 'Credit Card' ? paymentInfo : null,
         items: cart,
         total
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}` // Include the auth token in the request headers
+        }
       });
 
       if (response.data.status) {
