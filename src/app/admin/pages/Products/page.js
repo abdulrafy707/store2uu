@@ -1,100 +1,82 @@
-'use client';
-import { useEffect, useState } from 'react';
+'use client'
+import React, { useState, useEffect } from 'react';
 import FilterableTable from './FilterableTable';
 
-const fetchCategories = async () => {
-  try {
-    const response = await fetch('/api/categories');
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    return [];
-  }
-};
-
-const fetchSubcategories = async (categoryId = null) => {
-  try {
-    const response = await fetch(`/api/subcategories${categoryId ? `?categoryId=${categoryId}` : ''}`);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching subcategories:', error);
-    return [];
-  }
-};
-
-const fetchProducts = async (subcategoryIds = []) => {
-  try {
-    const response = await fetch(`/api/products${subcategoryIds.length ? `?subcategoryIds=${subcategoryIds.join(',')}` : ''}`);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    return [];
-  }
-};
-
-const ProductsPage = () => {
+const ProductPage = () => {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [colors, setColors] = useState([]);
+  const [sizes, setSizes] = useState([]);
 
-  const fetchData = async (categoryId = null) => {
-    setIsLoading(true);
-    const [fetchedCategories, fetchedSubcategories, fetchedProducts] = await Promise.all([
-      fetchCategories(),
-      fetchSubcategories(categoryId),
-      fetchProducts(),
-    ]);
-    setCategories(fetchedCategories);
-    setSubcategories(fetchedSubcategories);
-    setProducts(fetchedProducts);
-    setIsLoading(false);
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('/api/products');
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
   };
 
-  const handleCategoryClick = async (categoryId) => {
-    setSelectedCategory(categoryId);
-    const fetchedSubcategories = await fetchSubcategories(categoryId);
-    const subcategoryIds = fetchedSubcategories.map(subcategory => subcategory.id);
-    const fetchedProducts = await fetchProducts(subcategoryIds);
-    setSubcategories(fetchedSubcategories);
-    setProducts(fetchedProducts);
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/categories');
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchSubcategories = async () => {
+    try {
+      const response = await fetch('/api/subcategories');
+      const data = await response.json();
+      setSubcategories(data);
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+    }
+  };
+
+  const fetchColors = async () => {
+    try {
+      const response = await fetch('/api/colors');
+      const data = await response.json();
+      setColors(data);
+    } catch (error) {
+      console.error('Error fetching colors:', error);
+    }
+  };
+
+  const fetchSizes = async () => {
+    try {
+      const response = await fetch('/api/sizes');
+      const data = await response.json();
+      setSizes(data);
+    } catch (error) {
+      console.error('Error fetching sizes:', error);
+    }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchProducts();
+    fetchCategories();
+    fetchSubcategories();
+    fetchColors();
+    fetchSizes();
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
-      {isLoading ? (
-        <div className="text-center text-2xl">Loading...</div>
-      ) : (
-        <>
-          {/* <div className="flex space-x-4 overflow-x-auto">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                className={`cursor-pointer p-2 rounded ${selectedCategory === category.id ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'}`}
-                onClick={() => handleCategoryClick(category.id)}
-              >
-                {category.name}
-              </button>
-            ))}
-          </div> */}
-          <FilterableTable
-            products={products}
-            fetchProducts={() => fetchData(selectedCategory)}
-            categories={categories}
-            subcategories={subcategories}
-          />
-        </>
-      )}
-    </div>
+    <FilterableTable
+      products={products}
+      fetchProducts={fetchProducts}
+      categories={categories}
+      subcategories={subcategories}
+      colors={colors}
+      sizes={sizes}
+    />
   );
 };
 
-export default ProductsPage;
+export default ProductPage;

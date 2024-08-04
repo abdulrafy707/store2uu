@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { FiUser, FiHome, FiMapPin, FiPhone, FiMail, FiCreditCard, FiCalendar, FiLock } from 'react-icons/fi';
+import { FiUser, FiHome, FiMapPin, FiPhone, FiMail, FiCreditCard, FiCalendar, FiLock, FiTag } from 'react-icons/fi';
 import {jwtDecode} from 'jwt-decode';
 
 const CheckoutPage = () => {
@@ -27,6 +27,11 @@ const CheckoutPage = () => {
   });
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState(0);
+  const [couponCode, setCouponCode] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [couponMessage, setCouponMessage] = useState('');
+  const [deliveryCharge, setDeliveryCharge] = useState(0);
+  const [taxRate, setTaxRate] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -57,7 +62,26 @@ const CheckoutPage = () => {
 
     const totalAmount = storedCart.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
     setTotal(totalAmount);
+
+    fetchSettings();
   }, [router]);
+
+  const fetchSettings = async () => {
+    try {
+      const response = await axios.get('/api/settings/getSettings');
+      const { deliveryCharge, taxPercentage } = response.data;
+      setDeliveryCharge(deliveryCharge);
+      setTaxRate(taxPercentage / 100);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+    }
+  };
+
+  const calculateTotal = () => {
+    const subtotalAfterDiscount = total - discount;
+    const tax = subtotalAfterDiscount * taxRate;
+    return subtotalAfterDiscount + tax + deliveryCharge;
+  };
 
   const handlePlaceOrder = async () => {
     try {
@@ -74,7 +98,11 @@ const CheckoutPage = () => {
         paymentMethod,
         paymentInfo: paymentMethod === 'Credit Card' ? paymentInfo : null,
         items: cart,
-        total
+        total: calculateTotal(),
+        discount,
+        tax: (total - discount) * taxRate,
+        netTotal: calculateTotal(),
+        couponCode,
       }, {
         headers: {
           Authorization: `Bearer ${token}` // Include the auth token in the request headers
@@ -91,6 +119,24 @@ const CheckoutPage = () => {
     } catch (error) {
       console.error('Error placing order:', error);
       alert('Failed to place order. Please try again.');
+    }
+  };
+
+  const handleApplyCoupon = async () => {
+    try {
+      const response = await axios.post('/api/coupons/validate', { code: couponCode });
+      if (response.data.valid) {
+        const discountAmount = (total * response.data.discount) / 100;
+        setDiscount(discountAmount);
+        setCouponMessage(`Coupon applied! You get a discount of ${response.data.discount}% (Rs.${discountAmount.toFixed(2)})`);
+      } else {
+        setDiscount(0);
+        setCouponMessage(response.data.message);
+      }
+    } catch (error) {
+      console.error('Error validating coupon:', error);
+      setDiscount(0);
+      setCouponMessage('Failed to validate coupon');
     }
   };
 
@@ -205,22 +251,52 @@ const CheckoutPage = () => {
           <h2 className="text-2xl font-semibold mb-4">Order Summary</h2>
           <div className="bg-white shadow-lg rounded-lg p-4 flex flex-col gap-2">
             <div className="flex justify-between">
-              <p className="text-xl font-bold text-gray-700">Subtotal:</p>
-              <p className="text-xl text-gray-700">Rs.{total}</p>
+              <p className="text-md font-medium text-gray-700">Subtotal:</p>
+              <p className="text-xl text-gray-700">Rs.{total.toFixed(2)}</p>
             </div>
             <div className="flex justify-between">
-              <p className="text-md font-medium text-gray-700">Tax (10%):</p>
-              <p className="text-md text-gray-700">Rs.{(total * 0.1).toFixed(2)}</p>
+              <p className="text-md font-medium text-gray-700">Discount ({((discount / total) * 100).toFixed(2)}%):</p>
+              <p className="text-md text-gray-700">- Rs.{discount.toFixed(2)}</p>
+            </div>
+            <hr className="my-2" />
+            <div className="flex justify-between">
+              <p className="text-md font-medium text-gray-700">Subtotal after Discount:</p>
+              <p className="text-md text-gray-700">Rs.{(total - discount).toFixed(2)}</p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-md font-medium text-gray-700">Tax ({(taxRate * 100).toFixed(2)}%):</p>
+              <p className="text-md text-gray-700">Rs.{((total - discount) * taxRate).toFixed(2)}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-md font-medium text-gray-700">Delivery Charge:</p>
-              <p className="text-md text-gray-700">Rs.100</p>
+              <p className="text-md text-gray-700">Rs.{deliveryCharge.toFixed(2)}</p>
             </div>
             <hr className="my-2" />
             <div className="flex justify-between">
               <p className="text-xl font-bold text-gray-700">Total:</p>
-              <p className="text-xl text-gray-700">Rs.{(total + total * 0.1 + 100).toFixed(2)}</p>
+              <p className="text-xl text-gray-700">Rs.{calculateTotal().toFixed(2)}</p>
             </div>
+          </div>
+
+          {/* Coupon Code Form */}
+          <div className="mt-6">
+            <h2 className="text-2xl font-semibold mb-4">Coupon Code</h2>
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                placeholder="Enter coupon code"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value)}
+                className="w-full px-4 py-2 border rounded-md pr-10"
+              />
+              <FiTag className="absolute right-3 text-gray-500 font-bold" />
+            </div>
+            <button className="bg-blue-500 text-white py-2 px-4 rounded-md mt-4 w-full" onClick={handleApplyCoupon}>
+              Apply Coupon
+            </button>
+            {couponMessage && (
+              <p className="text-green-500 mt-2">{couponMessage}</p>
+            )}
           </div>
 
           {/* Payment Method Form */}

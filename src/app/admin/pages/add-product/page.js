@@ -25,6 +25,8 @@ const AddProductPageContent = () => {
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
+  const [colors, setColors] = useState([]);
+  const [sizes, setSizes] = useState([]);
   const [images, setImages] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +37,8 @@ const AddProductPageContent = () => {
 
   useEffect(() => {
     fetchCategories();
+    fetchColors();
+    fetchSizes();
     if (productId) {
       fetchProductData(productId);
     }
@@ -60,14 +64,34 @@ const AddProductPageContent = () => {
     }
   };
 
+  const fetchColors = async () => {
+    try {
+      const response = await fetch('/api/colors');
+      const data = await response.json();
+      setColors(data.map(color => ({ value: color.id, label: color.name })));
+    } catch (error) {
+      console.error('Error fetching colors:', error);
+    }
+  };
+
+  const fetchSizes = async () => {
+    try {
+      const response = await fetch('/api/sizes');
+      const data = await response.json();
+      setSizes(data.map(size => ({ value: size.id, label: size.name })));
+    } catch (error) {
+      console.error('Error fetching sizes:', error);
+    }
+  };
+
   const fetchProductData = async (id) => {
     try {
       const response = await fetch(`/api/products/${id}`);
       const data = await response.json();
       setNewProduct({
         ...data,
-        colors: data.colors.map((color) => ({ value: color, label: color })),
-        sizes: data.sizes.map((size) => ({ value: size, label: size })),
+        colors: data.colors.map((color) => ({ value: color.id, label: color.name })),
+        sizes: data.sizes.map((size) => ({ value: size.id, label: size.name })),
       });
       setExistingImages(data.images || []);
       if (data.categoryId) {
@@ -131,7 +155,7 @@ const AddProductPageContent = () => {
           });
 
       if (response.ok) {
-        router.push('/admin/pages/products');
+        router.push('/admin/pages/Products');
       } else {
         const errorData = await response.json();
         console.error('Failed to create/update product:', errorData.message);
@@ -223,18 +247,6 @@ const AddProductPageContent = () => {
     }
   };
 
-  const colorOptions = [
-    { value: 'Red', label: 'Red' },
-    { value: 'Blue', label: 'Blue' },
-    { value: 'Green', label: 'Green' },
-  ];
-
-  const sizeOptions = [
-    { value: 'S', label: 'S' },
-    { value: 'M', label: 'M' },
-    { value: 'L', label: 'L' },
-  ];
-
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       {isLoading && (
@@ -318,7 +330,7 @@ const AddProductPageContent = () => {
                 isMulti
                 value={newProduct.colors}
                 onChange={(selected) => setNewProduct({ ...newProduct, colors: selected })}
-                options={colorOptions}
+                options={colors}
                 className="mt-1"
                 classNamePrefix="select"
               />
@@ -329,7 +341,7 @@ const AddProductPageContent = () => {
                 isMulti
                 value={newProduct.sizes}
                 onChange={(selected) => setNewProduct({ ...newProduct, sizes: selected })}
-                options={sizeOptions}
+                options={sizes}
                 className="mt-1"
                 classNamePrefix="select"
               />

@@ -42,6 +42,17 @@ model Subcategory {
   updatedAt   DateTime     @updatedAt
 }
 
+model Size {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+}
+
+model Color {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+}
+
+
 model Product {
   id          Int          @id @default(autoincrement())
   name        String
@@ -58,6 +69,7 @@ model Product {
   orderItems  OrderItem[]
 }
 
+
 model Image {
   id         Int       @id @default(autoincrement())
   url        String
@@ -65,27 +77,42 @@ model Image {
   product    Product   @relation(fields: [productId], references: [id])
   createdAt  DateTime  @default(now())
 }
+model Coupon {
+  id          Int       @id @default(autoincrement())
+  code        String    @unique
+  discount    Float     // Discount percentage
+  expiration  DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
 
 model Order {
   id             Int          @id @default(autoincrement())
   userId         Int
   total          Float
+  discount       Float        @default(0.0)
+  tax            Float        @default(0.0)
+  netTotal       Float
   status         OrderStatus
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  recipientName  String?
+  recipientName  String
   streetAddress  String?
   apartmentSuite String?
-  city           String?
-  state          String?
-  zip            String?
-  country        String?
-  phoneNumber    String?
-  email          String?
-  paymentMethod  String?
+  city           String
+  state          String
+  zip            String
+  country        String
+  phoneNumber    String
+  email          String
+  paymentMethod  String
   paymentInfo    Json?
   orderItems     OrderItem[]
+  couponCode     String?      // Adding coupon code field
 }
+
 
 model OrderItem {
   id        Int      @id @default(autoincrement())
@@ -96,6 +123,18 @@ model OrderItem {
   order     Order    @relation(fields: [orderId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
 }
+model Settings {
+  id             Int      @id @default(autoincrement())
+  deliveryCharge Float
+  taxPercentage  Float
+  other1         Float    @default(0)
+  other2         Float    @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+
+
 
 
 enum Role {
@@ -110,4 +149,5 @@ enum OrderStatus {
   COMPLETED
   CANCELLED
 }
+
 

@@ -34,6 +34,8 @@ export async function GET() {
 
 
 // const prisma = new PrismaClient();
+
+
 const SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 export async function POST(request) {
@@ -57,9 +59,8 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Unauthorized', status: false }, { status: 401 });
     }
 
-    const { shippingAddress, paymentMethod, paymentInfo, items, total } = await request.json();
-    console.log('Order data:', { shippingAddress, paymentMethod, paymentInfo, items, total });
-
+    const { shippingAddress, paymentMethod, paymentInfo, items, total, discount = 0, tax, netTotal, couponCode = null } = await request.json();
+    
     if (!decoded.id || !items || items.length === 0 || !total) {
       console.log('Invalid order data');
       return NextResponse.json({ message: 'Invalid order data', status: false }, { status: 400 });
@@ -69,6 +70,9 @@ export async function POST(request) {
       data: {
         userId: decoded.id,
         total,
+        discount,
+        tax,
+        netTotal,
         status: 'PENDING',
         recipientName: shippingAddress.recipientName,
         streetAddress: shippingAddress.streetAddress,
@@ -81,6 +85,7 @@ export async function POST(request) {
         email: shippingAddress.email,
         paymentMethod,
         paymentInfo: paymentMethod === 'Credit Card' ? JSON.stringify(paymentInfo) : null,
+        couponCode,
         orderItems: {
           create: items.map(item => ({
             productId: item.id,

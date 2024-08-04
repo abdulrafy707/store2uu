@@ -132,7 +132,7 @@ const Products = () => {
                               className="h-40 w-full object-cover mb-4 rounded"
                               whileHover={{ scale: 1.1 }}
                               transition={{ duration: 0.3 }}
-                              onError={(e) => { e.target.onerror = null; e.target.src = '/default-image.png'; }} // Fallback image
+                              // onError={(e) => { e.target.onerror = null; e.target.src = ''; }} // Fallback image
                             />
                           ) : (
                             <div className="h-32 w-full bg-gray-200 mb-4 rounded flex items-center justify-center text-gray-500">

@@ -6,26 +6,41 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FiPlus, FiMinus, FiTrash2 } from 'react-icons/fi';
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode'; // Correct import
+import { jwtDecode } from 'jwt-decode'; // Correct import
 
 const CartPage = () => {
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState(0);
   const [tax, setTax] = useState(0);
-  const [deliveryCharge, setDeliveryCharge] = useState(100); // Assuming a fixed delivery charge
+  const [deliveryCharge, setDeliveryCharge] = useState(0);
+  const [taxRate, setTaxRate] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
     setCart(storedCart);
-    calculateTotal(storedCart);
+
+    fetchSettings().then(() => {
+      calculateTotal(storedCart);
+    });
   }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const response = await axios.get('/api/settings/getSettings');
+      const { deliveryCharge, taxPercentage } = response.data;
+      setDeliveryCharge(deliveryCharge);
+      setTaxRate(taxPercentage / 100);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+    }
+  };
 
   const calculateTotal = (cartItems) => {
     const subtotal = cartItems.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
-    const calculatedTax = subtotal * 0.1; // Assuming a tax rate of 10%
-    setTotal(subtotal + calculatedTax + deliveryCharge);
+    const calculatedTax = subtotal * taxRate;
     setTax(calculatedTax);
+    setTotal(subtotal + calculatedTax + deliveryCharge);
   };
 
   const handleCheckout = () => {
@@ -143,20 +158,20 @@ const CartPage = () => {
           <div className="bg-white shadow-lg rounded-lg p-4 flex flex-col gap-2">
             <div className="flex justify-between">
               <p className="text-xl font-bold text-gray-700">Subtotal:</p>
-              <p className="text-md text-gray-700">Rs.{total - tax - deliveryCharge}</p>
+              <p className="text-md text-gray-700">Rs.{(total - tax - deliveryCharge).toFixed(2)}</p>
             </div>
             <div className="flex justify-between">
-              <p className="text-md font-medium text-gray-700">Tax (10%):</p>
-              <p className="text-md text-gray-700">Rs.{tax}</p>
+              <p className="text-md font-medium text-gray-700">Tax ({(taxRate * 100).toFixed(2)}%):</p>
+              <p className="text-md text-gray-700">Rs.{tax.toFixed(2)}</p>
             </div>
             <div className="flex justify-between">
               <p className="text-md font-medium text-gray-700">Delivery Charge:</p>
-              <p className="text-md text-gray-700">Rs.{deliveryCharge}</p>
+              <p className="text-md text-gray-700">Rs.{deliveryCharge.toFixed(2)}</p>
             </div>
             <hr className="h-2"></hr>
             <div className="flex justify-between">
               <p className="text-xl font-bold text-gray-700">Total:</p>
-              <p className="text-md text-gray-700">Rs.{total}</p>
+              <p className="text-md text-gray-700">Rs.{total.toFixed(2)}</p>
             </div>
             <button
               className="bg-teal-500 text-white py-2 px-4 rounded-md mt-4 w-full"

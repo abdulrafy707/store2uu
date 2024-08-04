@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 import 'react-quill/dist/quill.snow.css';
 
-const FilterableTable = ({ products = [], fetchProducts, categories = [], subcategories = [] }) => {
+const FilterableTable = ({ products = [], fetchProducts, categories = [], subcategories = [], colors = [], sizes = [] }) => {
   const [filter, setFilter] = useState('');
   const [filteredData, setFilteredData] = useState(products);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
@@ -21,6 +21,8 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
     price: '',
     stock: '',
     subcategoryId: '',
+    colorId: '',
+    sizeId: '',
     images: []
   });
   const fileInputRef = useRef(null);
@@ -74,6 +76,8 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
       price: item.price,
       stock: item.stock,
       subcategoryId: item.subcategoryId,
+      colorId: item.colorId,
+      sizeId: item.sizeId,
       images: item.images.map((image) => ({ url: image.url })), // Ensure proper structure
     });
   };
@@ -136,6 +140,8 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
           price: '',
           stock: '',
           subcategoryId: '',
+          colorId: '',
+          sizeId: '',
           images: [],
         });
       } else {
@@ -155,6 +161,8 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
       price: '',
       stock: '',
       subcategoryId: '',
+      colorId: '',
+      sizeId: '',
       images: []
     });
   };
@@ -251,7 +259,7 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
 
       {editProduct && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-4 w-[700px] rounded shadow-lg">
+          <div className="bg-white p-4 w-[700px] max-h-[90vh] overflow-auto rounded shadow-lg">
             <h2 className="text-xl mb-4">Edit Product</h2>
             <form onSubmit={handleFormSubmit}>
               <div className="mb-4">
@@ -302,6 +310,34 @@ const FilterableTable = ({ products = [], fetchProducts, categories = [], subcat
                   <option value="">Select Subcategory</option>
                   {filteredSubcategories.map(subcat => (
                     <option key={subcat.id} value={subcat.id}>{subcat.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Color</label>
+                <select
+                  name="colorId"
+                  value={productForm.colorId}
+                  onChange={handleFormChange}
+                  className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Color</option>
+                  {colors.map(color => (
+                    <option key={color.id} value={color.id}>{color.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Size</label>
+                <select
+                  name="sizeId"
+                  value={productForm.sizeId}
+                  onChange={handleFormChange}
+                  className="mt-1 p-2 border border-gray-300 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select Size</option>
+                  {sizes.map(size => (
+                    <option key={size.id} value={size.id}>{size.name}</option>
                   ))}
                 </select>
               </div>

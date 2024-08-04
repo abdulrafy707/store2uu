@@ -1,18 +1,18 @@
 'use client';
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { jwtDecode } from 'jwt-decode';
-import { FaUsers, FaSignOutAlt, FaChevronDown, FaCube, FaShoppingCart, FaTags } from 'react-icons/fa';
+import { FaUsers, FaSignOutAlt, FaChevronDown, FaCube, FaShoppingCart, FaTags, FaPaintBrush, FaRuler, FaCogs, FaTicketAlt } from 'react-icons/fa';
 
 const Sidebar = ({ setActiveComponent }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState({
     customers: false,
-    branches: false,
-    adminUsers: false,
-    filetypes: false,
     products: false,
     orders: false,
     categories: false,
+    size: false,
+    color: false,
+    settings: false,
+    coupons: false,
   });
 
   const toggleDropdown = (key) => {
@@ -22,26 +22,13 @@ const Sidebar = ({ setActiveComponent }) => {
     }));
   };
 
-  // useEffect(() => {
-  //   const token = Cookies.get('token');
-  //   if (!token) {
-  //     alert('Login to see the dashboard!');
-  //     router.push('/admin');
-  //   } else {
-  //     const decodedToken = jwtDecode(token);
-  //   }
-  // }, []);
-
-  
-
   const handleLogout = () => {
     Cookies.remove('token');
     window.location.href = '/admin';
   };
 
-
   return (
-    <div className="bg-gray-700 text-white w-64 min-h-screen flex flex-col">
+    <div className="bg-gray-700 text-white w-64 min-h-screen flex flex-col text-sm">
       <div className="p-4 text-center">
         <img width={50} height={50} src="/store2u.webp" alt="Profile" className="rounded-full mx-auto mb-2" />
         <h2 className="text-lg font-semibold">Store2u</h2>
@@ -99,6 +86,7 @@ const Sidebar = ({ setActiveComponent }) => {
               </ul>
             )}
           </li>
+
           <li>
             <button
               className="flex items-center w-full p-2 hover:bg-blue-700 rounded focus:outline-none"
@@ -120,6 +108,7 @@ const Sidebar = ({ setActiveComponent }) => {
               </ul>
             )}
           </li>
+
           <li>
             <button
               className="flex items-center w-full p-2 hover:bg-blue-700 rounded focus:outline-none"
@@ -134,7 +123,7 @@ const Sidebar = ({ setActiveComponent }) => {
                 <li>
                   <a href='/admin/pages/categories'>
                     <button className="flex items-center p-2 hover:bg-blue-700 rounded">
-                      <span className="ml-2"> Categories</span>
+                      <span className="ml-2">Categories</span>
                     </button>
                   </a>
                 </li>
@@ -142,6 +131,94 @@ const Sidebar = ({ setActiveComponent }) => {
                   <a href='/admin/pages/subcategories'>
                     <button className="flex items-center p-2 hover:bg-blue-700 rounded">
                       <span className="ml-2">SubCategory</span>
+                    </button>
+                  </a>
+                </li>
+              </ul>
+            )}
+          </li>
+
+          <li>
+            <button
+              className="flex items-center w-full p-2 hover:bg-blue-700 rounded focus:outline-none"
+              onClick={() => toggleDropdown('size')}
+            >
+              <FaRuler className="h-5 w-5" />
+              <span className="ml-2">Size</span>
+              <FaChevronDown className="h-5 w-5 ml-auto" />
+            </button>
+            {isDropdownOpen.size && (
+              <ul className="ml-8 mt-2 space-y-2">
+                <li>
+                  <a href='/admin/pages/size'>
+                    <button className="flex items-center p-2 hover:bg-blue-700 rounded">
+                      <span className="ml-2">Sizes</span>
+                    </button>
+                  </a>
+                </li>
+              </ul>
+            )}
+          </li>
+
+          <li>
+            <button
+              className="flex items-center w-full p-2 hover:bg-blue-700 rounded focus:outline-none"
+              onClick={() => toggleDropdown('color')}
+            >
+              <FaPaintBrush className="h-5 w-5" />
+              <span className="ml-2">Color</span>
+              <FaChevronDown className="h-5 w-5 ml-auto" />
+            </button>
+            {isDropdownOpen.color && (
+              <ul className="ml-8 mt-2 space-y-2">
+                <li>
+                  <a href='/admin/pages/color'>
+                    <button className="flex items-center p-2 hover:bg-blue-700 rounded">
+                      <span className="ml-2">Colors</span>
+                    </button>
+                  </a>
+                </li>
+              </ul>
+            )}
+          </li>
+
+          <li>
+            <button
+              className="flex items-center w-full p-2 hover:bg-blue-700 rounded focus:outline-none"
+              onClick={() => toggleDropdown('settings')}
+            >
+              <FaCogs className="h-5 w-5" />
+              <span className="ml-2">Settings</span>
+              <FaChevronDown className="h-5 w-5 ml-auto" />
+            </button>
+            {isDropdownOpen.settings && (
+              <ul className="ml-8 mt-2 space-y-2">
+                <li>
+                  <a href='/admin/pages/settings'>
+                    <button className="flex items-center p-2 hover:bg-blue-700 rounded">
+                      <span className="ml-2">Settings</span>
+                    </button>
+                  </a>
+                </li>
+              </ul>
+            )}
+          </li>
+
+          <li>
+            <button
+              className="flex items-center w-full p-2 hover:bg-blue-700 rounded focus:outline-none"
+              onClick={() => toggleDropdown('coupons')}
+            >
+              <FaTicketAlt className="h-5 w-5" />
+              <span className="ml-2">Coupons</span>
+              <FaChevronDown className="h-5 w-5 ml-auto" />
+            </button>
+            {isDropdownOpen.coupons && (
+              <ul className="ml-8 mt-2 space-y-2">
+                <li>
+                  <a href='/admin/pages/coupons'>
+                    <button className="flex items-center p-2 hover:bg-blue-700 rounded">
+                      <span className="ml-2">Coupons</span>
                     </button>
                   </a>
                 </li>
